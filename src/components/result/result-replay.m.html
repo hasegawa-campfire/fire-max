@@ -22,7 +22,9 @@
 
       const ios = /Macintosh|Mac OS X|iPhone|iPad/i.test(navigator.userAgent)
       const icon = this.shadowRoot.querySelector(ios ? '.icon.ios' : '.icon.std')
+
       setCSSProps(icon, { '--display': 'block' })
+      if (!navigator.share) setCSSProps(share, { '--display': 'none' })
     }
 
     getUrl() {
@@ -93,6 +95,10 @@
       justify-content: center;
       gap: 0 calc(1.6cqw + 4px);
       max-width: var(--scene-width);
+    }
+
+    .button.share {
+      display: var(--display, block);
     }
 
     .button.share .icon {
