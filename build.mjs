@@ -101,7 +101,7 @@ await esbuild.build({
       assets: [
         { from: './src/assets/*', to: './assets' },
         { from: './src/manifest.json', to: './' },
-        // { from: './src/sw.js', to: './' },
+        { from: './src/sw.js', to: './' },
       ],
     }),
   ],

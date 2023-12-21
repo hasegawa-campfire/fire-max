@@ -13,7 +13,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const fn = async () => {
-    let res = await caches.match(e.request)
+    let res = await caches.match(e.request, { ignoreSearch: true })
     if (!res) {
       res = await fetch(e)
       const cache = await caches.open(cacheName)
