@@ -1,0 +1,148 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { store } from '@/r.js'
+
+  class PlayBg extends HTMLElement {
+    anime = new CSSAnime()
+    isFever = false
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    update() {
+      if (this.isFever !== store.isFever) {
+        this.isFever = store.isFever
+        if (store.isFever) {
+          this.anime.play('fever-start', 'overlay-fever-start')
+          this.anime.cancel('fever-end', 'overlay-fever-end')
+        } else {
+          this.anime.cancel('fever-start', 'overlay-fever-start')
+          this.anime.play('fever-end', 'overlay-fever-end')
+        }
+      }
+    }
+  }
+
+  customElements.define('play-bg', PlayBg)
+</script>
+
+<template>
+  <div class="bg-fever"></div>
+  <div class="bg-linear"></div>
+  <div class="bg-frame"></div>
+  <div class="overlay"></div>
+
+  <style>
+    :host {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(to bottom, var(--bg-vivid-2), var(--bg-vivid-1) 70%, var(--bg-vivid-0));
+      contain: strict;
+    }
+
+    .bg-linear {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: calc(100% + ((16cqw + 80px) * 1.4142));
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        135deg,
+        transparent 0,
+        transparent calc(4cqw + 20px),
+        #fff6 calc(4cqw + 20px),
+        #fff6 calc(8cqw + 40px),
+        transparent calc(8cqw + 40px),
+        transparent calc(12cqw + 60px),
+        #fffa calc(12cqw + 60px),
+        #fffa calc(16cqw + 80px)
+      );
+      animation: bg-linear 3s infinite linear;
+      /* will-change: transform; */
+      contain: strict;
+    }
+
+    @keyframes bg-linear {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(calc((16cqw + 80px) * -1.4142));
+      }
+    }
+
+    .bg-frame {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/halftone-left.png'), url('assets/halftone-right.png');
+      background-position: left calc(-2cqw - 10px) top 0, right calc(-2cqw - 10px) top 0;
+      background-repeat: repeat-y;
+      background-size: calc(6.4cqw + 32px) auto;
+      contain: strict;
+    }
+
+    .bg-fever {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background-image: linear-gradient(to bottom, var(--fever-0), var(--fever-1));
+      animation: fever-start 0.2s ease-out forwards paused, fever-end 0.2s ease-in paused;
+      /* will-change: opacity; */
+      contain: strict;
+    }
+
+    @keyframes fever-start {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fever-end {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0.8;
+      animation: overlay-fever-start 0.2s ease-out forwards paused, overlay-fever-end 0.2s ease-in paused;
+      /* will-change: opacity; */
+      contain: strict;
+    }
+
+    @keyframes overlay-fever-start {
+      from {
+        opacity: 0.8;
+      }
+      to {
+        opacity: 0.65;
+      }
+    }
+
+    @keyframes overlay-fever-end {
+      from {
+        opacity: 0.65;
+      }
+      to {
+        opacity: 0.8;
+      }
+    }
+  </style>
+</template>

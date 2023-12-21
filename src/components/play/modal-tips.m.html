@@ -1,0 +1,111 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setTipsRead } from '@/helper.js'
+  import '../x-modal.m.html'
+  import '../takibi-san.m.html'
+
+  class ModalTips extends HTMLElement {
+    #modal
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#modal = this.shadowRoot.querySelector('x-modal')
+      this.#modal.addEventListener('close', () => setTipsRead())
+    }
+
+    open() {
+      this.#modal.open()
+    }
+
+    get opened() {
+      return this.#modal.opened
+    }
+
+    close() {
+      this.#modal.close()
+    }
+  }
+
+  customElements.define('modal-tips', ModalTips)
+</script>
+
+<template>
+  <x-modal label="TIPS">
+    <div class="body">
+      <div class="takibi-list">
+        <takibi-san type="a" rank="0" basis="height" shadow></takibi-san>
+        <takibi-san type="b" rank="0" basis="height" shadow></takibi-san>
+        <takibi-san type="a" rank="1" basis="height" shadow></takibi-san>
+        <takibi-san type="b" rank="1" basis="height" shadow></takibi-san>
+        <takibi-san type="a" rank="2" basis="height" shadow></takibi-san>
+        <takibi-san type="b" rank="2" basis="height" shadow></takibi-san>
+      </div>
+      <div class="text">
+        『焚き火さん』をたくさん集めよう<br />
+        集めるほど<strong>火力</strong>が上がって<strong>得点もアップ！</strong>
+      </div>
+    </div>
+  </x-modal>
+
+  <style>
+    :host {
+      display: contents;
+    }
+
+    .body {
+      border: #888 2px solid;
+      padding: calc(1.6cqw + 8px) 0;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+
+    .takibi-list {
+      display: flex;
+      justify-content: center;
+      gap: 0 calc(0.4cqw + 2px);
+    }
+
+    takibi-san {
+      height: calc(6cqw + 30px);
+    }
+
+    .text {
+      margin-top: calc(1.2cqw + 6px);
+      border-top: 2px #ccc dashed;
+      padding: calc(1.2cqw + 6px) calc(1.2cqw + 6px) 0;
+      text-align: center;
+      color: #666;
+      font-size: calc(1.6cqw + 8px);
+      line-height: 1.5;
+    }
+
+    strong {
+      position: relative;
+      display: inline-block;
+      font-weight: 900;
+      z-index: 0;
+    }
+
+    strong::before {
+      content: '';
+      z-index: -1;
+      display: block;
+      position: absolute;
+      inset: 60% 0 0;
+      background-color: var(--fever-0);
+      animation: strong 0.2s steps(2, jump-none) infinite;
+    }
+
+    @keyframes strong {
+      from {
+        background-color: var(--fever-0);
+        opacity: 0.6;
+      }
+      to {
+        background-color: var(--fever-1);
+        opacity: 0.6;
+      }
+    }
+  </style>
+</template>

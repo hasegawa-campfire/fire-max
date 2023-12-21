@@ -1,0 +1,365 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { CSSProp } from '@/lib/css-prop.js'
+  import { random, store, se } from '@/r.js'
+
+  class GridBillboard extends HTMLElement {
+    anime = new CSSAnime()
+    hitDisplay
+    hitSmallDisplay
+    type = null
+    rank = 0
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const hit = this.shadowRoot.querySelectorAll('.hit')
+      this.hitDisplay = new CSSProp(hit[0], '--display')
+      this.hitSmallDisplay = new CSSProp(hit[1], '--display')
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    update() {
+      if (this.rank < store.rank && (this.type === 'a' || this.type === 'b')) {
+        this.rank = store.rank
+        this.hitSmallDisplay.value = 'none'
+        this.hitDisplay.value = 'block'
+        this.anime.cancel('rank-a-1', 'rank-a-2', 'rank-b-0', 'rank-b-1', 'rank-b-2')
+
+        if (store.isFever) {
+          this.type = 'wild'
+          this.anime.play(`type-${this.type}`, 'flash')
+        } else {
+          this.anime.play(`type-${this.type}-${this.rank}`, 'flash')
+        }
+      }
+    }
+
+    show(type, rank) {
+      this.type = type
+      this.rank = rank
+      this.anime.cancel()
+      if (type === 'a' || type === 'b') {
+        this.anime.play(`type-${type}-${rank}`, 'show', 'shadow-show')
+      } else if (type === 'wild') {
+        this.anime.play('type-wild', 'show', 'shadow-show')
+      } else {
+        this.anime.play('type-bad', 'show-bad', 'shadow-show-bad')
+      }
+      if (type === 'bad' || rank <= 0) {
+        this.hitSmallDisplay.value = 'block'
+      } else {
+        this.hitDisplay.value = 'block'
+      }
+      if (type === 'bad') se.takibiShowBad.play(0.25 * 0.5)
+      else se.takibiShow.play()
+    }
+
+    hide() {
+      this.anime.cancel('show', 'show-bad', 'shadow-show', 'shadow-show-bad')
+      if (this.type === 'bad') this.anime.play('hide-bad', 'shadow-hide-bad')
+      else this.anime.play('hide', 'shadow-hide')
+      se.takibiHide.play()
+    }
+
+    clear() {
+      this.hitDisplay.value = 'none'
+      this.hitSmallDisplay.value = 'none'
+    }
+
+    hit() {
+      this.type = null
+      this.anime.cancel('show', 'show-bad', 'shadow-show', 'shadow-show-bad')
+      this.anime.play('hit')
+      this.hitDisplay.value = 'none'
+      this.hitSmallDisplay.value = 'none'
+    }
+  }
+
+  customElements.define('grid-billboard', GridBillboard)
+</script>
+
+<template>
+  <div class="hit normal"></div>
+  <div class="hit small"></div>
+  <div class="shadow"></div>
+  <div class="char">
+    <div class="char-image"></div>
+  </div>
+
+  <style>
+    .hit {
+      aspect-ratio: 1500 / 1426;
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      width: 80%;
+      /* box-shadow: 0 0 0 4px #0002 inset; */
+      pointer-events: all;
+      display: var(--display, none);
+      /* will-change: display; */
+      contain: layout size;
+    }
+
+    .hit.small {
+      aspect-ratio: 1500 / 1078;
+    }
+
+    .shadow {
+      position: absolute;
+      bottom: calc(-15% + 0.5px);
+      left: 25%;
+      width: 50%;
+      height: 30%;
+      background-color: #00000018;
+      transform: rotateX(45deg) translateY(-30%);
+      border-radius: 50%;
+      opacity: 0;
+      animation: shadow-show 0.3s forwards paused, shadow-show-bad 0.25s forwards paused,
+        shadow-hide 0.2s ease-out paused, shadow-hide-bad 0.2s ease-out paused, hit 0.1s paused;
+      /* will-change: opacity, transform; */
+      contain: strict;
+    }
+
+    @keyframes shadow-show {
+      0% {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        animation-timing-function: ease-out;
+        opacity: 0;
+      }
+      35% {
+        transform: rotateX(45deg) translateY(-30%) scale(0.5);
+        animation-timing-function: ease-in;
+        opacity: 0.5;
+      }
+      70% {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        animation-timing-function: ease-out;
+        opacity: 1;
+      }
+      85% {
+        transform: rotateX(45deg) translateY(-30%) scale(1.2);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shadow-show-bad {
+      0% {
+        transform: rotateX(45deg) translateY(-30%) scale(0.5);
+        animation-timing-function: ease-in;
+        opacity: 0;
+      }
+      50% {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        animation-timing-function: ease-out;
+        opacity: 1;
+      }
+      75% {
+        transform: rotateX(45deg) translateY(-30%) scale(0.9);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shadow-hide {
+      from {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        opacity: 0.67;
+      }
+      to {
+        transform: rotateX(45deg) translateY(-30%) scale(0.67);
+        opacity: 0;
+      }
+    }
+
+    @keyframes shadow-hide-bad {
+      from {
+        transform: rotateX(45deg) translateY(-30%) scale(1);
+        opacity: 0.67;
+      }
+      to {
+        transform: rotateX(45deg) translateY(-30%) scale(0.9);
+        opacity: 0;
+      }
+    }
+
+    .char {
+      aspect-ratio: 1500 / 1426;
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      width: 80%;
+      opacity: 0;
+      transform-origin: center bottom;
+      overflow: hidden;
+      animation: flash 0.5s ease-in paused, show 0.3s forwards paused, show-bad 0.25s ease-in forwards paused,
+        hide 0.2s ease-out paused, hide-bad 0.2s ease-out paused, hit 0.1s paused;
+      /* will-change: opacity, transform, filter; */
+      contain: strict;
+    }
+
+    @keyframes show {
+      0% {
+        transform: translateY(0%) scale(1, 1);
+        animation-timing-function: ease-out;
+        opacity: 0;
+      }
+      35% {
+        transform: translateY(-33%) scale(0.8, 1.2);
+        animation-timing-function: ease-in;
+        opacity: 0.5;
+      }
+      70% {
+        transform: translateY(0%) scale(1, 1);
+        animation-timing-function: ease-out;
+        opacity: 1;
+      }
+      85% {
+        transform: translateY(0%) scale(1.2, 0.8);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: translateY(0%) scale(1, 1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes show-bad {
+      0% {
+        transform: translateY(-66.7%);
+        opacity: 0;
+        animation-timing-function: ease-in;
+      }
+      50% {
+        transform: translateY(0%);
+        opacity: 1;
+        animation-timing-function: ease-out;
+      }
+      75% {
+        transform: translateY(-8%);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes hide {
+      from {
+        transform: scale(1);
+        opacity: 0.67;
+      }
+      to {
+        transform: scale(0.67, 0.8);
+        opacity: 0;
+      }
+    }
+
+    @keyframes hide-bad {
+      from {
+        transform: scale(1);
+        opacity: 0.67;
+      }
+      to {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+    }
+
+    @keyframes hit {
+      from {
+        opacity: 0.5;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes flash {
+      0% {
+        filter: contrast(0) brightness(2);
+      }
+      20% {
+        filter: contrast(0) brightness(2);
+      }
+      100% {
+        filter: contrast(1) brightness(1);
+      }
+    }
+
+    .char-image {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 300%;
+      height: 300%;
+      background-image: var(--takibi-url);
+      background-size: 100% 100%;
+      background-position: 0% 0%;
+      background-repeat: no-repeat;
+      animation: type-a-1 0s forwards paused, type-a-2 0s forwards paused, type-b-0 0s forwards paused,
+        type-b-1 0s forwards paused, type-b-2 0s forwards paused, type-bad 0s forwards paused,
+        type-wild 0.2s steps(2, jump-none) infinite paused;
+      /* will-change: transform; */
+      contain: size paint;
+    }
+
+    @keyframes type-a-1 {
+      to {
+        transform: translate(0%, -33.33%);
+      }
+    }
+
+    @keyframes type-a-2 {
+      to {
+        transform: translate(0%, -66.67%);
+      }
+    }
+
+    @keyframes type-b-0 {
+      to {
+        transform: translate(-33.33%, 0%);
+      }
+    }
+
+    @keyframes type-b-1 {
+      to {
+        transform: translate(-33.33%, -33.33%);
+      }
+    }
+
+    @keyframes type-b-2 {
+      to {
+        transform: translate(-33.33%, -66.67%);
+      }
+    }
+
+    @keyframes type-bad {
+      to {
+        transform: translate(-66.67%, 0%);
+      }
+    }
+
+    @keyframes type-wild {
+      from {
+        transform: translate(-66.67%, -33.33%);
+      }
+      to {
+        transform: translate(-66.67%, -66.67%);
+      }
+    }
+  </style>
+</template>

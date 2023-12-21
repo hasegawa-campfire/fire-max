@@ -1,0 +1,93 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+  import { store, loop } from '@/r.js'
+  import '../x-text.m.html'
+  import './status-chain.m.html'
+  import './status-rank.m.html'
+  import './status-time.m.html'
+  import './status-score.m.html'
+
+  class StatusRoot extends HTMLElement {
+    #children
+    #score
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      this.#children = this.shadowRoot.querySelectorAll('status-time,status-score,status-chain,status-rank')
+
+      if (store.isReplay) {
+        const replay = this.shadowRoot.querySelector('.replay')
+        setCSSProps(replay, { '--display': 'block' })
+      }
+    }
+
+    update() {
+      for (const el of this.#children) el.update()
+    }
+  }
+
+  customElements.define('status-root', StatusRoot)
+</script>
+
+<template>
+  <div class="data">
+    <status-time></status-time>
+    <div class="data-center">
+      <div class="data-center-top">
+        <status-score></status-score>
+      </div>
+      <div class="data-center-bottom">
+        <status-rank></status-rank>
+        <status-chain></status-chain>
+      </div>
+    </div>
+    <x-text class="replay" deco>REPLAY</x-text>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+    }
+
+    .data {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 calc(0.8cqw + 4px);
+    }
+
+    .data-center {
+      flex: auto;
+    }
+
+    .data-center-top {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .data-center-bottom {
+      margin-top: calc(0.6cqw + 3px);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0 calc(0.6cqw + 3px);
+    }
+
+    .replay {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      display: var(--display, none);
+      font-size: calc(2.2cqw + 11px);
+      letter-spacing: 2px;
+      color: #eee;
+      --x-text-stroke-width: calc(0.4cqw + 2px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+      contain: layout;
+    }
+  </style>
+</template>

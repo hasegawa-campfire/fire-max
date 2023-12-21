@@ -1,0 +1,152 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+
+  class TakibiSan extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+  }
+
+  customElements.define('takibi-san', TakibiSan)
+</script>
+
+<template>
+  <div class="shadow"></div>
+  <div class="char">
+    <div class="char-image"></div>
+  </div>
+
+  <style>
+    :host {
+      aspect-ratio: 1500 / 1426;
+      position: relative;
+      display: block;
+      contain: size;
+    }
+
+    .shadow {
+      aspect-ratio: 4 / 1;
+      display: none;
+      width: 72%;
+      position: absolute;
+      border-radius: 50%;
+      background-color: #0002;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 50%);
+    }
+
+    :host([shadow]) .shadow {
+      display: block;
+    }
+
+    :host([rank='0']) .shadow {
+      width: 57%;
+    }
+
+    :host([basis='height']) .shadow {
+      width: auto;
+      height: 19%;
+    }
+
+    :host([rank='0'][basis='height']) .shadow {
+      height: 15%;
+    }
+
+    .char {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      contain: size paint;
+    }
+
+    :host([rank='0'][basis='width']) {
+      aspect-ratio: 1500 / 1078;
+    }
+
+    :host([rank='0'][basis='height']) {
+      aspect-ratio: 988 / 1426;
+    }
+
+    :host([rank='1'][basis='height']) {
+      aspect-ratio: 1166 / 1426;
+    }
+
+    :host([rank='2'][basis='height']) {
+      aspect-ratio: 1428 / 1426;
+    }
+
+    :host([type='bad'][basis='width']) {
+      aspect-ratio: 1500 / 986;
+    }
+
+    :host([type='bad'][basis='height']) {
+      aspect-ratio: 988 / 1426;
+    }
+
+    .char-image {
+      aspect-ratio: 1500 / 1426;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 100%;
+      transform: translateX(-50%);
+      background-image: var(--takibi-url);
+      background-size: 300% auto;
+      background-position: 0% 0%;
+      background-repeat: no-repeat;
+      backface-visibility: hidden;
+    }
+
+    :host([basis='height']) .char-image {
+      height: 100%;
+      width: auto;
+    }
+
+    :host([rank='0']) .char-image {
+      background-position-y: 0%;
+    }
+
+    :host([rank='1']) .char-image {
+      background-position-y: 50%;
+    }
+
+    :host([rank='2']) .char-image {
+      background-position-y: 100%;
+    }
+
+    :host([type='a']) .char-image {
+      background-position-x: 0%;
+    }
+
+    :host([type='b']) .char-image {
+      background-position-x: 50%;
+    }
+
+    :host([type='bad']) .char-image {
+      background-position: 100% 0%;
+    }
+
+    :host([type='wild']) .char-image {
+      aspect-ratio: 1500 / 2852;
+      background-position: 100% 100%;
+      animation: type-wild 0.4s steps(2, jump-none) infinite;
+      /* will-change: transform; */
+    }
+
+    :host([type='wild'][basis='height']) .char-image {
+      height: 200%;
+    }
+
+    @keyframes type-wild {
+      from {
+        transform: translate(-50, 0%);
+      }
+      to {
+        transform: translate(-50%, 50%);
+      }
+    }
+  </style>
+</template>

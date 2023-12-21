@@ -1,0 +1,109 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+  import './effect-star.m.html'
+
+  class ResultBg extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const stars = this.shadowRoot.querySelectorAll('effect-star')
+      const iArr = Array.from(stars).map((_, i) => i + 1)
+      const jArr = Array.from(stars).map((_, i) => i + 1)
+      for (const el of stars) {
+        const iIndex = Math.floor(Math.random() * iArr.length)
+        const jIndex = Math.floor(Math.random() * jArr.length)
+        setCSSProps(el, { '--i': iArr.splice(iIndex, 1)[0], '--j': jArr.splice(jIndex, 1)[0] })
+      }
+    }
+  }
+
+  customElements.define('result-bg', ResultBg)
+</script>
+
+<template>
+  <div class="bg-conic"></div>
+  <div class="bg-stars" style="--len: 10">
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+    <effect-star></effect-star>
+  </div>
+  <div class="bg-frame"></div>
+  <div class="overlay"></div>
+
+  <style>
+    :host {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, var(--bg-vivid-2), var(--bg-vivid-1), var(--bg-vivid-0));
+      contain: strict;
+    }
+
+    .bg-conic {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 150dvmax;
+      height: 150dvmax;
+      background-image: repeating-conic-gradient(
+        transparent 0,
+        transparent 9deg,
+        #fff6 9deg,
+        #fff6 18deg,
+        transparent 18deg,
+        transparent 27deg,
+        #fffd 27deg,
+        #fffd 36deg
+      );
+      -webkit-mask-image: radial-gradient(transparent 0%, transparent 16%, white 48%, white);
+      mask-image: radial-gradient(transparent 0%, transparent 16%, white 48%, white);
+      transform: translate(-50%, -50%);
+      animation: bg-conic 30s infinite linear;
+      /* will-change: transform; */
+      contain: strict;
+    }
+
+    @keyframes bg-conic {
+      from {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .bg-stars {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      contain: strict;
+    }
+
+    .bg-frame {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/halftone-left.png'), url('assets/halftone-right.png');
+      background-position: left calc(-2cqw - 10px) top 0, right calc(-2cqw - 10px) top 0;
+      background-repeat: repeat-y;
+      background-size: calc(6.4cqw + 32px) auto;
+      contain: strict;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0.8;
+      contain: strict;
+    }
+  </style>
+</template>

@@ -1,0 +1,90 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import '../x-text.m.html'
+
+  class EffectChain extends HTMLElement {
+    #count
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#count = this.shadowRoot.querySelector('.count')
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    show(count) {
+      this.#count.setText(count)
+      this.anime.play('show', 'label')
+    }
+  }
+
+  customElements.define('effect-chain', EffectChain)
+</script>
+
+<template>
+  <div class="content">
+    <x-text class="label">Chain</x-text>
+    <x-text class="count"></x-text>
+  </div>
+
+  <style>
+    .content {
+      position: absolute;
+      left: 50%;
+      bottom: 20%;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: calc(1.2cqw + 6px);
+      transform: translate(-50%, -50%);
+      font-size: calc(3.4cqw + 17px);
+      color: #fff;
+      opacity: 0;
+      animation: show 0.8s ease-out paused;
+      /* will-change: opacity, transform; */
+    }
+
+    @keyframes show {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(3, 0);
+      }
+      20% {
+        transform: translate(-50%, -60%) scale(1, 1);
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(1, 1);
+      }
+    }
+
+    .label {
+      color: var(--chain);
+      animation: label 0.15s steps(2, jump-none) infinite paused;
+      /* will-change: filter; */
+    }
+
+    @keyframes label {
+      from {
+        filter: brightness(1.5);
+      }
+      to {
+        filter: brightness(1);
+      }
+    }
+
+    .label,
+    .count {
+      --x-text-stroke-width: calc(0.5cqw + 2.5px);
+      --x-text-shadow-y: calc(-0.2cqw - 1px);
+    }
+  </style>
+</template>

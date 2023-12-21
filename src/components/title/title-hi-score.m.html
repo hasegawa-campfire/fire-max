@@ -1,0 +1,99 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+  import { store } from '@/r.js'
+  import { setKeyLog } from '@/keys.js'
+  import { decodeReplayCode, getRecord } from '@/helper.js'
+  import '../x-text.m.html'
+  import '../x-button.m.html'
+
+  class TitleHiScore extends HTMLElement {
+    replayData
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const code = getRecord()
+      this.replayData = code && decodeReplayCode(code)
+
+      if (!store.hiScore) store.hiScore = this.replayData?.score ?? 10000
+
+      const score = String(Math.min(store.hiScore, 99999999)).padStart(8, '0')
+      const nums = this.shadowRoot.querySelectorAll('.num')
+
+      nums[0].setText(score.slice(0, 4))
+      nums[1].setText(score.slice(4, 8))
+
+      const replay = this.shadowRoot.querySelector('.replay')
+
+      if (this.replayData) {
+        replay.addEventListener('click', () => this.replay())
+        setCSSProps(replay, { '--display': 'block' })
+      }
+    }
+
+    replay() {
+      store.seed = this.replayData.seed
+      store.isReplay = true
+      store.scene = 'play'
+      setKeyLog(this.replayData.keyLog)
+    }
+  }
+
+  customElements.define('title-hi-score', TitleHiScore)
+</script>
+
+<template>
+  <div>
+    <div class="label">HI-SCORE</div>
+    <div class="nums">
+      <x-text class="num first">0000</x-text>
+      <x-text class="num last">0000</x-text>
+    </div>
+  </div>
+  <x-button class="replay">
+    <img src="assets/icon-play.png" />
+  </x-button>
+
+  <style>
+    :host {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0 calc(2.4cqw + 12px);
+      padding: calc(1.6cqw + 8px) calc(3.2cqw + 16px);
+      background-color: #fff8;
+      border-radius: calc(0.8cqw + 4px);
+    }
+
+    .label {
+      color: #888;
+      font-size: calc(1.4cqw + 7px);
+    }
+
+    .nums {
+      margin-top: calc(0.2cqw + 1px);
+      display: flex;
+      align-items: baseline;
+      gap: 0 calc(0.2cqw + 1px);
+    }
+
+    .num {
+      font-size: calc(3cqw + 15px);
+      --x-text-stroke-width: calc(0.4cqw + 2px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+      color: #fff;
+    }
+
+    .num.last {
+      font-size: calc(2.4cqw + 12px);
+      --x-text-stroke-width: calc(0.3cqw + 1.5px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+    }
+
+    .replay {
+      display: var(--display, none);
+    }
+  </style>
+</template>

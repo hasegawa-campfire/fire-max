@@ -1,0 +1,70 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { store } from '@/r.js'
+  import './effect-score.m.html'
+  import './effect-chain.m.html'
+  import './effect-hit.m.html'
+  import './effect-hit-bad.m.html'
+  import './effect-ng.m.html'
+
+  class EffectCell extends HTMLElement {
+    #el
+    index
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#el = {
+        score: this.shadowRoot.querySelector('effect-score'),
+        chain: this.shadowRoot.querySelector('effect-chain'),
+        hit: this.shadowRoot.querySelector('effect-hit'),
+        'hit-bad': this.shadowRoot.querySelector('effect-hit-bad'),
+        ng: this.shadowRoot.querySelector('effect-ng'),
+      }
+      this.index = +this.getAttribute('index')
+    }
+
+    update() {
+      for (let i = 0; i < store.effects.length; i++) {
+        if (store.effects[i].index === this.index) {
+          const effect = store.effects.splice(i--, 1)[0]
+          this.#el[effect.type].show(...effect.args)
+        }
+      }
+    }
+  }
+
+  customElements.define('effect-cell', EffectCell)
+</script>
+
+<template>
+  <div class="effects">
+    <effect-ng></effect-ng>
+    <effect-hit></effect-hit>
+    <effect-hit-bad></effect-hit-bad>
+    <effect-score></effect-score>
+    <effect-chain></effect-chain>
+  </div>
+
+  <style>
+    :host {
+      position: relative;
+      display: block;
+      aspect-ratio: 1 / 1;
+      transform-style: preserve-3d;
+      contain: size;
+    }
+
+    .effects {
+      position: absolute;
+      bottom: 25%;
+      left: 0%;
+      width: 100%;
+      height: 100%;
+      transform: rotateX(-30deg);
+      transform-origin: bottom;
+      transform-style: preserve-3d;
+      contain: layout size;
+    }
+  </style>
+</template>

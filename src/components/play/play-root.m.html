@@ -1,0 +1,259 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { Random } from '@/lib/random.js'
+  import { activeState, loop, store, random, bgm, se } from '@/r.js'
+  import {
+    beforeUpdateKeys,
+    afterUpdateKeys,
+    playKeyLog,
+    recKeyLog,
+    endKeyLog,
+    setKeyLog,
+    isResetKeyDown,
+    isAnyKeyDown,
+  } from '@/keys.js'
+  import * as param from '@/param.js'
+  import { isTipsRead } from '@/helper.js'
+  import './play-bg.m.html'
+  import './status-root.m.html'
+  import './grid-root.m.html'
+  import './effect-root.m.html'
+  import './effect-ready.m.html'
+  import './effect-finish.m.html'
+  import './modal-tips.m.html'
+
+  class PlayRoot extends HTMLElement {
+    name = 'play'
+    #children
+    #ready
+    #finish
+    #modalTips
+    clicked = false
+    waitCount = 0
+    nextPhase = ''
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#ready = this.shadowRoot.querySelector('.ready')
+      this.#finish = this.shadowRoot.querySelector('.finish')
+      this.#children = this.shadowRoot.querySelectorAll('status-root, grid-root, effect-root, play-bg')
+
+      if (store.isReplay) {
+        random.seed = store.seed
+      } else {
+        random.seed = Random.genSeed()
+        store.seed = random.seed
+      }
+
+      Object.assign(store, {
+        playPhase: 'wait',
+        time: 60 * loop.fps,
+        score: 0,
+        hits: [0, 0, 0, 0],
+        laps: 0,
+        rank: 0,
+        rankExp: 0,
+        feverTime: 0,
+        chain: 0,
+        chainSteps: [],
+        chainEffect: null,
+        effects: [],
+      })
+
+      this.addEventListener('click', () => {
+        this.clicked = true
+      })
+
+      if (isTipsRead()) {
+        this.nextPhase = 'ready'
+        this.waitCount = 0.5 * loop.fps
+      } else {
+        this.nextPhase = 'tips'
+        this.waitCount = 0.8 * loop.fps
+        const container = this.shadowRoot.querySelector('.container')
+        this.#modalTips = document.createElement('modal-tips')
+        container.appendChild(this.#modalTips)
+      }
+    }
+
+    update() {
+      if (store.scene === 'play') {
+        if (store.playPhase === 'wait') this.updateWait()
+        else if (store.playPhase === 'tips') this.updateTips()
+        else if (store.playPhase === 'ready') this.updateReady()
+        else if (store.playPhase === 'play') this.updatePlay()
+        else if (store.playPhase === 'fin') this.updateFin()
+      }
+      this.clicked = false
+    }
+
+    updateWait() {
+      this.waitCount--
+      if (this.waitCount <= 0) {
+        store.playPhase = this.nextPhase
+        if (store.playPhase === 'ready') {
+          this.#ready.play()
+        }
+        if (store.playPhase === 'tips') {
+          this.#modalTips.open()
+          bgm.tips.play()
+        }
+      }
+    }
+
+    updateTips() {
+      if (!this.#modalTips.opened) {
+        store.playPhase = 'wait'
+        this.nextPhase = 'ready'
+        this.waitCount = 0.8 * loop.fps
+        bgm.tips.setVolume(0, 1)
+        bgm.tips.stop(1)
+      }
+    }
+
+    updateReady() {
+      if (this.#ready.isFinished()) {
+        store.playPhase = 'play'
+        if (store.isReplay) {
+          playKeyLog()
+          beforeUpdateKeys()
+        } else {
+          recKeyLog()
+        }
+        bgm.play.play()
+      }
+    }
+
+    updatePlay() {
+      store.time--
+
+      for (const el of this.#children) el.update()
+
+      if (store.isFever) {
+        store.feverTime--
+        if (store.feverTime < store.feverTimeMax) {
+          store.rankExp = 0
+        }
+        if (store.feverTime <= 0 && bgm.fever.playing) {
+          bgm.fever.setVolume(0, 0.5)
+          bgm.fever.stop(0.5)
+        }
+        if (store.feverTime <= -0.3 * loop.fps) {
+          store.rank = 0
+          store.laps++
+          bgm.play.setVolume(1, 2)
+        }
+      } else {
+        while (store.rankExp >= param.nextRankExp(store)) {
+          store.rank++
+          if (store.isFever) {
+            store.feverTimeMax = param.feverTime(store) * loop.fps
+            store.feverTime = store.feverTimeMax + 0.3 * loop.fps
+            store.chainSteps.fill('wild')
+            bgm.play.setVolume(0, 1)
+            bgm.fever.play()
+            se.rankMax.play()
+          } else {
+            se.rankUp.play()
+          }
+        }
+
+        while (store.rank > 0 && store.rankExp < param.prevRankExp(store)) {
+          store.rank--
+        }
+
+        store.rankExp = Math.max(store.rankExp, 0)
+      }
+
+      if (store.time <= 0) {
+        this.#finish.play()
+        store.playPhase = 'fin'
+        if (!store.isReplay) afterUpdateKeys()
+        endKeyLog()
+        bgm.play.setVolume(0, 2)
+        bgm.play.stop(2)
+        bgm.fever.setVolume(0, 2)
+        bgm.fever.stop(2)
+      } else if (isResetKeyDown()) {
+        store.scene = 'title'
+        se.buttonDown.play()
+      }
+    }
+
+    updateFin() {
+      const keyDown = (this.clicked || isAnyKeyDown()) && this.#finish.isFinished()
+      if (keyDown || this.#finish.isFinishedAll()) {
+        store.scene = 'result'
+      }
+    }
+
+    fin() {
+      endKeyLog()
+      bgm.tips.stop()
+      bgm.play.stop()
+      bgm.fever.stop()
+    }
+  }
+
+  customElements.define('play-root', PlayRoot)
+</script>
+
+<template>
+  <play-bg></play-bg>
+
+  <div class="container">
+    <status-root></status-root>
+    <div class="playground-wrap">
+      <div class="playground">
+        <grid-root></grid-root>
+        <effect-root></effect-root>
+      </div>
+    </div>
+    <effect-ready class="ready"></effect-ready>
+    <effect-finish class="finish"></effect-finish>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      contain: size;
+    }
+
+    play-bg {
+      z-index: 0;
+    }
+
+    .container {
+      height: 100%;
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 1fr;
+      z-index: 1;
+      contain: size;
+    }
+
+    status-root {
+      z-index: 1;
+    }
+
+    .playground-wrap {
+      position: relative;
+      z-index: 0;
+    }
+
+    .playground {
+      aspect-ratio: 700 / 570;
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      max-width: 100%;
+      max-height: 100%;
+      contain: layout size;
+    }
+  </style>
+</template>

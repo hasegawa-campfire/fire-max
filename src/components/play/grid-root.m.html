@@ -1,0 +1,99 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { loop, random, store } from '@/r.js'
+  import * as param from '@/param.js'
+  import './grid-cell.m.html'
+
+  const takibiType = ['a', 'b', 'wild']
+
+  class GridRoot extends HTMLElement {
+    #cells
+    time = -0.3 * loop.fps
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#cells = Array.from(this.shadowRoot.querySelectorAll('grid-cell'))
+    }
+
+    update() {
+      this.time++
+
+      const wait = param.prepTime(store)
+      const fast = this.time > 0 && !this.#cells.some((c) => takibiType.includes(c.type))
+
+      if (fast || this.time > wait * loop.fps) {
+        this.time = 0
+        for (let i = 0; i < param.showCount(store); i++) {
+          const cell = this.#cells[random.nextInt(this.#cells.length)]
+          if (cell.isReady()) cell.showTakibi(fast)
+        }
+      }
+
+      for (const el of this.#cells) el.update()
+    }
+  }
+
+  customElements.define('grid-root', GridRoot)
+</script>
+
+<template>
+  <div class="content">
+    <div class="cell-list-wrap">
+      <div class="cell-list">
+        <grid-cell index="0"></grid-cell>
+        <grid-cell index="1"></grid-cell>
+        <grid-cell index="2"></grid-cell>
+        <grid-cell index="3"></grid-cell>
+        <grid-cell index="4"></grid-cell>
+        <grid-cell index="5"></grid-cell>
+        <grid-cell index="6"></grid-cell>
+        <grid-cell index="7"></grid-cell>
+        <grid-cell index="8"></grid-cell>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      position: absolute;
+      inset: auto 0 0;
+      aspect-ratio: 1 / 1;
+      contain: layout size;
+    }
+
+    .content {
+      position: relative;
+      perspective: 100cqw;
+      transform-style: preserve-3d;
+      bottom: calc(1.2cqw + 4px);
+      pointer-events: none;
+    }
+
+    .cell-list-wrap {
+      transform: rotateX(30deg);
+      transform-origin: bottom;
+      border: calc(0.6cqw + 2px) solid #888;
+      transform-style: preserve-3d;
+      background-color: var(--bg-light-0);
+      padding: calc(1.8cqw + 6px);
+      border-radius: calc(1.8cqw + 6px);
+      box-shadow: 0 calc(1.2cqw + 4px) 0 0 #888;
+    }
+
+    .cell-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(0.6cqw + 2px);
+      transform-style: preserve-3d;
+      border: calc(0.6cqw + 2px) solid #fff;
+      background-color: #fff;
+      border-radius: calc(1.5cqw + 5px);
+    }
+
+    grid-cell {
+      border-radius: calc(1.2cqw + 4px);
+    }
+  </style>
+</template>

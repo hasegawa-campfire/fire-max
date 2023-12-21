@@ -1,0 +1,96 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { se } from '@/r.js'
+
+  class EffectHitBad extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    show(type, chainStep) {
+      this.anime.play('spark')
+    }
+  }
+
+  customElements.define('effect-hit-bad', EffectHitBad)
+</script>
+
+<template>
+  <div class="content">
+    <div class="sparks">
+      <div class="spark" style="--i: 0"></div>
+      <div class="spark" style="--i: 1"></div>
+      <div class="spark" style="--i: 2"></div>
+      <div class="spark" style="--i: 3"></div>
+      <div class="spark" style="--i: 4"></div>
+      <div class="spark" style="--i: 5"></div>
+    </div>
+  </div>
+
+  <style>
+    .content {
+      position: absolute;
+      display: block;
+      left: 50%;
+      bottom: 30%;
+      contain: size layout;
+    }
+
+    .sparks {
+      position: relative;
+      /* animation: sparks 1s linear infinite; */
+      /* will-change: transform; */
+      contain: size;
+    }
+
+    @keyframes sparks {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spark {
+      position: absolute;
+      left: calc(-2cqw - 10px);
+      top: calc(-2cqw - 10px);
+      width: calc(4cqw + 20px);
+      height: calc(4cqw + 20px);
+      background-color: #000;
+      border-radius: 50%;
+      opacity: 0;
+      --deg: calc(60deg * var(--i) + 30deg);
+      animation: spark 0.4s ease-out backwards paused;
+      /* will-change: transform, opacity; */
+      contain: strict;
+    }
+
+    @keyframes spark {
+      0% {
+        transform: rotate(var(--deg)) translateY(0%) scale(1);
+        opacity: 0;
+        animation-timing-function: ease-out;
+      }
+      40% {
+        transform: rotate(var(--deg)) translateY(-180%) scale(1.5);
+      }
+      80% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: rotate(var(--deg)) translateY(-190%) scale(0);
+        opacity: 0;
+      }
+    }
+  </style>
+</template>

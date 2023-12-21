@@ -1,0 +1,56 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { store, loop } from '@/r.js'
+  import '../x-text.m.html'
+  import './status-chain.m.html'
+  import './status-rank.m.html'
+  import './status-time.m.html'
+
+  class StatusScore extends HTMLElement {
+    #first
+    #last
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#first = this.shadowRoot.querySelector('.first')
+      this.#last = this.shadowRoot.querySelector('.last')
+    }
+
+    update() {
+      const count = String(Math.min(store.score, 99999999)).padStart(8, '0')
+      this.#first.setText(count.slice(0, 4))
+      this.#last.setText(count.slice(4))
+    }
+  }
+
+  customElements.define('status-score', StatusScore)
+</script>
+
+<template>
+  <x-text class="count first">0000</x-text>
+  <x-text class="count last">0000</x-text>
+
+  <style>
+    :host {
+      display: flex;
+      gap: 0 calc(0.2cqw + 1px);
+      align-items: baseline;
+    }
+
+    .count {
+      position: relative;
+      display: inline-block;
+      font-size: calc(2.2cqw + 11px);
+      letter-spacing: 1px;
+      color: #fff;
+      --x-text-stroke-width: calc(0.4cqw + 2px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+    }
+
+    .count.last {
+      font-size: calc(1.6cqw + 8px);
+      --x-text-stroke-width: calc(0.3cqw + 1.5px);
+    }
+  </style>
+</template>

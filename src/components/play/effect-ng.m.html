@@ -1,0 +1,94 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { se } from '@/r.js'
+
+  class EffectNg extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    show(type) {
+      this.anime.play('show')
+      if (type === 'bad') se.ngBad.play()
+      else se.ng.play()
+    }
+  }
+
+  customElements.define('effect-ng', EffectNg)
+</script>
+
+<template>
+  <div class="content">
+    <div class="cross"></div>
+    <div class="cross"></div>
+  </div>
+
+  <style>
+    .content {
+      position: absolute;
+      display: block;
+      opacity: 0;
+      left: 50%;
+      bottom: 25%;
+      animation: show 0.5s paused;
+      /* will-change: transform, opadicy; */
+      contain: layout size;
+    }
+
+    @keyframes show {
+      0% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+      10% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      80% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+    }
+
+    .cross {
+      position: absolute;
+      width: calc(10cqw + 50px);
+      height: calc(1.2cqw + 6px);
+      left: calc(-5cqw - 25px);
+      top: calc(-0.6cqw - 3px);
+      border-radius: calc(0.4cqw + 2px);
+      animation: cross 0.15s infinite alternate;
+      /* will-change: background-color; */
+      contain: strict;
+    }
+
+    @keyframes cross {
+      from {
+        background-color: #692d2d;
+      }
+      to {
+        background-color: #ff0000;
+      }
+    }
+
+    .cross:nth-child(1) {
+      transform: rotate(45deg);
+    }
+
+    .cross:nth-child(2) {
+      transform: rotate(-45deg);
+    }
+  </style>
+</template>

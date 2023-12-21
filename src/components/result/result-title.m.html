@@ -1,0 +1,190 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { se } from '@/r.js'
+  import '../x-text.m.html'
+
+  class ResultTitle extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      se.resultTitle.play(1.2)
+    }
+  }
+
+  customElements.define('result-title', ResultTitle)
+</script>
+
+<template>
+  <div class="title">
+    <div class="char-wrap" style="--i: 0">
+      <x-text class="char" deco>R</x-text>
+      <x-text class="char blink1" deco>R</x-text>
+      <x-text class="char blink2" deco>R</x-text>
+    </div>
+    <div class="char-wrap" style="--i: 1">
+      <x-text class="char" deco>E</x-text>
+      <x-text class="char blink1" deco>E</x-text>
+      <x-text class="char blink2" deco>E</x-text>
+    </div>
+    <div class="char-wrap" style="--i: 2">
+      <x-text class="char" deco>S</x-text>
+      <x-text class="char blink1" deco>S</x-text>
+      <x-text class="char blink2" deco>S</x-text>
+    </div>
+    <div class="char-wrap" style="--i: 3">
+      <x-text class="char" deco>U</x-text>
+      <x-text class="char blink1" deco>U</x-text>
+      <x-text class="char blink2" deco>U</x-text>
+    </div>
+    <div class="char-wrap" style="--i: 4">
+      <x-text class="char" deco>L</x-text>
+      <x-text class="char blink1" deco>L</x-text>
+      <x-text class="char blink2" deco>L</x-text>
+    </div>
+    <div class="char-wrap" style="--i: 5">
+      <x-text class="char" deco>T</x-text>
+      <x-text class="char blink1" deco>T</x-text>
+      <x-text class="char blink2" deco>T</x-text>
+    </div>
+  </div>
+
+  <x-text class="effect">RESULT</x-text>
+
+  <style>
+    :host {
+      display: block;
+    }
+
+    .title {
+      position: relative;
+      display: flex;
+      font-size: calc(4cqw + 20px);
+      --x-text-stroke-width: calc(0.3cqw + 1.5px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+      animation: title 0.2s 1.2s backwards ease-out, title-standby 1.8s 1.4s infinite;
+      /* will-change: transform; */
+    }
+
+    @keyframes title {
+      from {
+        opacity: 0;
+        transform: translateY(50%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0%);
+      }
+    }
+
+    @keyframes title-standby {
+      0% {
+        transform: translateY(0%);
+        animation-timing-function: ease-out;
+      }
+      25% {
+        transform: translateY(-5%);
+        animation-timing-function: ease-in;
+      }
+      50% {
+        transform: translateY(0%);
+        animation-timing-function: ease-out;
+      }
+      75% {
+        transform: translateY(5%);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: translateY(0%);
+      }
+    }
+
+    .char-wrap {
+      position: relative;
+    }
+
+    .char {
+      color: var(--bg-light-0);
+    }
+
+    .char.blink1,
+    .char.blink2 {
+      --bpm: calc(60s / 140);
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      contain: layout;
+    }
+
+    .char.blink1 {
+      color: var(--bg-light-1);
+      animation: blink calc(3 * var(--bpm)) calc((var(--i) - 2) * var(--bpm)) linear infinite;
+    }
+
+    .char.blink2 {
+      color: var(--bg-light-2);
+      animation: blink calc(3 * var(--bpm)) calc((var(--i) - 1) * var(--bpm)) linear infinite;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity: 1;
+      }
+      33.33% {
+        opacity: 1;
+      }
+      33.34% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes color {
+      from {
+        color: #ddd;
+        animation-timing-function: ease-in-out;
+      }
+      to {
+        color: #f2f2f2;
+        animation-timing-function: ease-in-out;
+      }
+    }
+
+    .effect {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      font-size: calc(6cqw + 30px);
+      color: #fff;
+      --x-text-stroke-width: calc(0.4cqw + 2px);
+      --x-text-shadow-y: calc(0.3cqw + 1.5px);
+      transform: translate(-50%, -50%);
+      animation: effect 1s 0.2s;
+      opacity: 0;
+      contain: layout;
+    }
+
+    @keyframes effect {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate(-66%, 0);
+        animation-timing-function: ease-out;
+      }
+      20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate(0, 0);
+      }
+      80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate(0, 0);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate(0, -50%);
+      }
+    }
+  </style>
+</template>

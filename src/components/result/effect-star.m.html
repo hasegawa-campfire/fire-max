@@ -1,0 +1,76 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+
+  class EffectStar extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const el = this.shadowRoot.querySelector('.fall')
+
+      const scale = Math.random() * 0.6 + 0.7
+      const duration = 10 / scale
+      const rollDuration = 7 / scale
+
+      setCSSProps(el, {
+        '--scale': `${scale.toFixed(2)}`,
+        '--duration': `${duration.toFixed(2)}s`,
+        '--roll-duration': `${rollDuration.toFixed(2)}s`,
+        '--roll-delay': `${(Math.random() * -8).toFixed(2)}s`,
+      })
+    }
+  }
+
+  customElements.define('effect-star', EffectStar)
+</script>
+
+<template>
+  <div class="fall">
+    <div class="roll"></div>
+  </div>
+
+  <style>
+    .fall {
+      position: absolute;
+      top: 0;
+      left: calc(100% / (var(--len) + 1) * var(--i));
+      animation: fall var(--duration) calc(var(--duration) / var(--len) * var(--j) * -1) infinite linear;
+      /* will-change: transform; */
+      contain: layout size;
+    }
+
+    @keyframes fall {
+      from {
+        transform: translateY(calc(0cqh - 3cqw - 15px));
+      }
+      to {
+        transform: translateY(calc(100cqh + 3cqw + 15px));
+      }
+    }
+
+    .roll {
+      position: absolute;
+      left: 0;
+      top: 0;
+      aspect-ratio: 1 / 1;
+      width: calc(4cqw + 20px);
+      animation: roll var(--roll-duration) var(--roll-delay) linear infinite;
+      /* will-change: transform; */
+      contain: layout;
+      background-image: url('assets/star.png');
+      background-size: contain;
+      opacity: 0.8;
+      contain: strict;
+    }
+
+    @keyframes roll {
+      from {
+        transform: translate(-50%, -50%) scale(var(--scale)) rotate(0deg);
+      }
+      to {
+        transform: translate(-50%, -50%) scale(var(--scale)) rotate(360deg);
+      }
+    }
+  </style>
+</template>

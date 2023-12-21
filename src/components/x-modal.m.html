@@ -1,0 +1,215 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import './x-text.m.html'
+  import './x-button.m.html'
+
+  class XModal extends HTMLElement {
+    anime = new CSSAnime()
+    opened = false
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const label = this.shadowRoot.querySelector('.label-text')
+      label.setText(this.getAttribute('label') ?? '')
+
+      const close = this.shadowRoot.querySelector('.close-button')
+      close.addEventListener('click', () => this.close())
+
+      const accept = this.shadowRoot.querySelector('.accept-button')
+      accept.addEventListener('click', () => this.accept())
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    open() {
+      this.opened = true
+      this.anime.cancel()
+      this.anime.play('show', 'bg-show')
+    }
+
+    accept() {
+      const e = new CustomEvent('accept', { cancelable: true, bubbles: true, composed: true })
+      this.dispatchEvent(e)
+      if (!e.defaultPrevented) this.close()
+    }
+
+    close() {
+      const e = new CustomEvent('close', { cancelable: true, bubbles: true, composed: true })
+      this.dispatchEvent(e)
+      if (!e.defaultPrevented) {
+        this.opened = false
+        this.anime.cancel()
+        this.anime.play('hide', 'bg-hide')
+      }
+    }
+  }
+
+  customElements.define('x-modal', XModal)
+</script>
+
+<template>
+  <div class="bg"></div>
+
+  <div class="modal-wrap">
+    <div class="modal">
+      <div class="label"><x-text class="label-text"></x-text></div>
+      <div class="content">
+        <slot></slot>
+      </div>
+      <div class="buttons">
+        <x-button large class="close-button">
+          <x-text class="close-text">閉じる</x-text>
+        </x-button>
+        <x-button large class="accept-button">
+          <img src="assets/icon-play.png" />
+        </x-button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :host {
+      display: contents;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background-color: #fffc;
+      opacity: 0;
+      transform: scale(0);
+      pointer-events: all;
+      z-index: 9;
+      animation: bg-show 0.4s linear forwards paused, bg-hide 0.2s ease-out paused;
+      contain: strict;
+    }
+
+    @keyframes bg-show {
+      from {
+        transform: scale(1);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bg-hide {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(1);
+        opacity: 0;
+      }
+    }
+
+    .modal-wrap {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      z-index: 9;
+      contain: layout size;
+    }
+
+    .modal {
+      margin: auto;
+      width: calc(40cqw + 200px);
+      max-width: 100%;
+      max-height: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto;
+      gap: calc(0.6cqw + 3px) 0;
+      padding: calc(1cqw + 5px) calc(1cqw + 5px) calc(0.6cqw + 3px);
+      border-radius: calc(0.8cqw + 4px);
+      border: calc(0.3cqw + 1.5px) #888 solid;
+      box-shadow: 0 calc(0.4cqw + 2px) 0 0 #888, 0 0 0 calc(0.3cqw + 1.5px) #fff inset;
+      opacity: 0;
+      transform: scale(0);
+      box-sizing: border-box;
+      background-image: url('assets/halftone-bottom.png'),
+        linear-gradient(to bottom, var(--bg-light-0), var(--bg-light-1));
+      background-position: bottom, 0 0;
+      background-repeat: repeat-x;
+      background-size: auto 48px, 100% 100%;
+      pointer-events: all;
+      animation: show 0.2s ease-out forwards paused, hide 0.2s ease-in paused;
+    }
+
+    @keyframes show {
+      from {
+        transform: scale(1) translateY(33%);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    @keyframes hide {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        transform: scale(1);
+        opacity: 0;
+      }
+    }
+
+    .label {
+      position: absolute;
+      left: calc(-1.2cqw - 6px);
+      top: calc(-1.4cqw - 7px);
+      color: #888;
+      --x-text-stroke-color: transparent;
+      font-size: calc(1.2cqw + 6px);
+      border-radius: 2px;
+      border: #888 2px solid;
+      box-shadow: 0 2px 0 #888;
+      background-color: #fff;
+      padding: 2px 8px;
+      width: calc(10cqw + 50px);
+    }
+
+    .content {
+      min-height: 0;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    :host([accept]) .buttons {
+      justify-content: space-between;
+    }
+
+    .close-text {
+      color: #fff;
+      --x-text-stroke-width: 2px;
+      --x-text-stroke-color: #888;
+      --x-text-shadow-y: 0;
+      font-size: 20px;
+    }
+
+    .accept-button {
+      display: none;
+    }
+
+    :host([accept]) .accept-button {
+      display: block;
+    }
+  </style>
+</template>

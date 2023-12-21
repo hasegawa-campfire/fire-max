@@ -1,0 +1,158 @@
+<script type="module">
+  import { se } from '@/r.js'
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+
+  class XButton extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const button = this.shadowRoot.querySelector('button')
+      button.addEventListener('pointerup', () => this.onPointerUp())
+      button.addEventListener('click', (e) => e.stopPropagation())
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    onPointerUp() {
+      if (this.anime.isRunning('click', 'overlay')) return
+
+      this.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }))
+      se.buttonDown.play()
+      this.anime.play('click', 'overlay')
+    }
+
+    click() {
+      this.onPointerUp()
+    }
+  }
+
+  customElements.define('x-button', XButton)
+</script>
+
+<template>
+  <button class="button" type="button" onkeydown="return false" tabindex="-1">
+    <div class="bg"></div>
+    <div class="content">
+      <slot></slot>
+    </div>
+    <div class="overlay"></div>
+  </button>
+
+  <style>
+    :host {
+      display: block;
+      position: relative;
+      width: 60px;
+      height: 60px;
+      pointer-events: all;
+      contain: size;
+    }
+
+    :host([large]) {
+      width: 120px;
+    }
+
+    .button {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      background-color: var(--button-face);
+      border: 4px var(--button-dark) solid;
+      cursor: pointer;
+      z-index: 0;
+      padding: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+      box-shadow: 6px 6px 0 #0002, 0 0 0 4px #fffb inset;
+      font: inherit;
+      animation: standby 0.8s infinite alternate, click 0.2s ease-out paused;
+      /* will-change: filter; */
+      contain: size;
+    }
+
+    @keyframes standby {
+      from {
+        filter: brightness(1.2);
+      }
+      to {
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes click {
+      from {
+        filter: brightness(1.3);
+      }
+      33% {
+        filter: brightness(1);
+      }
+      67% {
+        filter: brightness(1.3);
+      }
+      to {
+        filter: brightness(1);
+      }
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/halftone-bottom-a3.png');
+      background-position: bottom;
+      background-repeat: repeat-x;
+      background-size: auto 50%;
+      z-index: -1;
+      contain: layout;
+    }
+
+    .content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #fff;
+      contain: size paint;
+    }
+
+    .content ::slotted(img) {
+      height: 75%;
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background-color: var(--button-face);
+      border-radius: inherit;
+      mix-blend-mode: overlay;
+      box-shadow: 0 0 4px var(--button-face);
+      animation: overlay 0.4s ease-out paused;
+      contain: strict;
+    }
+
+    @keyframes overlay {
+      from {
+        opacity: 1;
+        inset: 0;
+      }
+      to {
+        opacity: 0;
+        inset: -24px;
+      }
+    }
+  </style>
+</template>

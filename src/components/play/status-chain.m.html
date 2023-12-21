@@ -1,0 +1,160 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { store } from '@/r.js'
+
+  class StatusChain extends HTMLElement {
+    stepsPrev = []
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    update() {
+      if (store.chainEffect) this.stepsPrev.splice(0, 3, null, null, null)
+
+      if (store.chainSteps.length > 0) {
+        for (let i = 0; i < 3; i++) {
+          if (this.stepsPrev[i] !== store.chainSteps[i]) {
+            this.stepsPrev[i] = store.chainSteps[i]
+            const anime = this.anime.select(`.step-${i}`)
+            anime.cancel()
+            if (store.chainSteps[i]) anime.play(`color-${store.chainSteps[i]}`, 'show')
+          }
+        }
+      } else if (Array.isArray(store.chainEffect)) {
+        for (let i = 0; i < 3; i++) {
+          const anime = this.anime.select(`.step-${i}`)
+          anime.cancel()
+          if (store.chainEffect[i]) anime.play(`hide-${store.chainEffect[i]}`, 'flash')
+        }
+      }
+
+      store.chainEffect = null
+    }
+  }
+
+  customElements.define('status-chain', StatusChain)
+</script>
+
+<template>
+  <div class="label">CHAIN</div>
+  <div class="step-list">
+    <div class="step step-0">
+      <div class="step-flash step-0"></div>
+    </div>
+    <div class="step step-1">
+      <div class="step-flash step-1"></div>
+    </div>
+    <div class="step step-2">
+      <div class="step-flash step-2"></div>
+    </div>
+  </div>
+
+  <style>
+    :host {
+      display: grid;
+      grid-template-columns: auto;
+      align-items: center;
+      gap: calc(0.6cqw + 3px);
+      background-color: #fff;
+      padding: calc(0.3cqw + 1.5px);
+      border-radius: calc(0.8cqw + 4px);
+      border: calc(0.3cqw + 1.5px) #888 solid;
+      box-shadow: 0 calc(0.4cqw + 2px) 0 0 #888;
+    }
+
+    .label {
+      font-size: calc(1.6cqw + 8px);
+      line-height: 1;
+      color: #888;
+      display: none;
+    }
+
+    .step-list {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 0 calc(0.3cqw + 1.5px);
+    }
+
+    .step {
+      width: calc(2cqw + 10px);
+      height: calc(2cqw + 10px);
+      border-radius: calc(0.4cqw + 2px);
+      background-color: var(--bg-light-0);
+      overflow: hidden;
+      animation: color-a 0s forwards paused, color-b 0s forwards paused, color-wild 0s forwards paused,
+        hide-a 0.3s step-start paused, hide-b 0.3s step-start paused, hide-wild 0.3s step-start paused;
+      /* will-change: background-color; */
+      contain: size paint;
+    }
+
+    @keyframes color-a {
+      to {
+        background-color: var(--takibi-a);
+      }
+    }
+
+    @keyframes color-b {
+      to {
+        background-color: var(--takibi-b);
+      }
+    }
+
+    @keyframes color-wild {
+      to {
+        background-color: var(--fever-0);
+      }
+    }
+
+    @keyframes hide-a {
+      to {
+        background-color: var(--takibi-a);
+      }
+    }
+
+    @keyframes hide-b {
+      to {
+        background-color: var(--takibi-b);
+      }
+    }
+
+    @keyframes hide-wild {
+      to {
+        background-color: var(--fever-0);
+      }
+    }
+
+    .step-flash {
+      height: 100%;
+      opacity: 0;
+      background-color: #fff;
+      animation: show 0.15s ease-in paused, flash 0.1s steps(2, jump-none) 3 paused;
+      /* will-change: opacity; */
+    }
+
+    @keyframes show {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes flash {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
+</template>

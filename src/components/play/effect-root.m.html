@@ -1,0 +1,64 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import './effect-cell.m.html'
+
+  class EffectRoot extends HTMLElement {
+    #cells
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#cells = this.shadowRoot.querySelectorAll('effect-cell')
+    }
+
+    update() {
+      for (const el of this.#cells) el.update()
+    }
+  }
+
+  customElements.define('effect-root', EffectRoot)
+</script>
+
+<template>
+  <div class="content">
+    <div class="cell-list">
+      <effect-cell index="0"></effect-cell>
+      <effect-cell index="1"></effect-cell>
+      <effect-cell index="2"></effect-cell>
+      <effect-cell index="3"></effect-cell>
+      <effect-cell index="4"></effect-cell>
+      <effect-cell index="5"></effect-cell>
+      <effect-cell index="6"></effect-cell>
+      <effect-cell index="7"></effect-cell>
+      <effect-cell index="8"></effect-cell>
+    </div>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      position: absolute;
+      inset: auto 0 0;
+      aspect-ratio: 1 / 1;
+      pointer-events: none;
+      contain: layout size;
+    }
+
+    .content {
+      position: relative;
+      perspective: 100cqw;
+      transform-style: preserve-3d;
+      bottom: calc(1.2cqw + 4px);
+    }
+
+    .cell-list {
+      transform: rotateX(30deg);
+      transform-origin: bottom;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(0.6cqw + 2px);
+      transform-style: preserve-3d;
+      padding: calc(3cqw + 10px);
+    }
+  </style>
+</template>

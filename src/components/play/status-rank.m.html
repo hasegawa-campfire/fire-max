@@ -1,0 +1,294 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSProp } from '@/lib/css-prop.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { store } from '@/r.js'
+  import * as param from '@/param.js'
+
+  class StatusRank extends HTMLElement {
+    anime = new CSSAnime()
+    ratio
+    rank
+    prevExp = 0
+    prevFeverTime = -1
+    prevRank = 0
+    prevFever = false
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const main = this.shadowRoot.querySelector('.main')
+      this.ratio = new CSSProp(main, '--ratio')
+      this.rank = new CSSProp(main, '--rank')
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+      this.anime.select('.rank-0').play('rank-label')
+    }
+
+    update() {
+      if (store.isFever) {
+        if (this.prevFeverTime !== store.feverTime) {
+          const r = store.feverTime / store.feverTimeMax
+          this.ratio.value = `${(Math.min(1, Math.max(0, r)) * 100).toFixed(2)}%`
+          this.prevFeverTime = store.feverTime
+        }
+      } else {
+        const laps = Math.min(store.laps, 2)
+        if (this.prevExp !== store.rankExp) {
+          const base = param.prevRankExp(store)
+          const unitRatio = (store.rankExp - base) / (param.nextRankExp(store) - base)
+          const r = (store.rank + unitRatio) / 3
+          this.ratio.value = `${(Math.min(1, Math.max(0, r)) * 100).toFixed(2)}%`
+          this.prevExp = store.rankExp
+        }
+      }
+
+      if (this.prevRank !== store.rank) {
+        if (this.prevRank < store.rank) {
+          this.anime.play('steps-flash')
+        } else {
+          this.anime.cancel('steps-flash')
+        }
+        this.anime.cancel('rank-label')
+        this.anime.select(`.rank-${store.rank}`).play('rank-label')
+        this.rank.value = store.rank
+        this.prevRank = store.rank
+      }
+
+      if (this.prevFever !== store.isFever) {
+        if (store.isFever) {
+          this.anime.play('fever-show')
+          this.anime.cancel('fever-hide')
+        } else {
+          this.anime.cancel('fever-show')
+          this.anime.play('fever-hide')
+        }
+        this.prevFever = store.isFever
+      }
+    }
+  }
+
+  customElements.define('status-rank', StatusRank)
+</script>
+
+<template>
+  <div class="label">POW</div>
+
+  <div class="main">
+    <div class="bar steps">
+      <div class="bar-ratio steps">
+        <div class="steps-fill"></div>
+      </div>
+      <div class="steps-nums">
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+      </div>
+      <div class="steps-flash"></div>
+    </div>
+
+    <div class="bar fever">
+      <div class="bar-ratio fever">
+        <div class="fever-blink"></div>
+      </div>
+    </div>
+
+    <div class="rank-labels">
+      <x-text class="rank-label rank-0">1</x-text>
+      <x-text class="rank-label rank-1">2</x-text>
+      <x-text class="rank-label rank-2">3</x-text>
+    </div>
+    <div class="rank-labels">
+      <x-text class="rank-label rank-3">MAX</x-text>
+    </div>
+  </div>
+
+  <style>
+    :host {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: calc(0.5cqw + 2.5px);
+      background-color: #fff;
+      padding: calc(0.3cqw + 1.5px);
+      border-radius: calc(0.8cqw + 4px);
+      border: calc(0.3cqw + 1.5px) #888 solid;
+      box-shadow: 0 calc(0.4cqw + 2px) 0 0 #888;
+    }
+
+    .label {
+      color: #888;
+      font-size: calc(1.6cqw + 8px);
+      line-height: 1;
+    }
+
+    .main {
+      position: relative;
+      height: calc(2cqw + 10px);
+    }
+
+    .bar {
+      position: absolute;
+      inset: 0;
+      border-radius: calc(0.4cqw + 2px);
+      overflow: hidden;
+      contain: strict;
+    }
+
+    .bar.steps {
+      background-image: linear-gradient(
+        to right,
+        var(--rank-bg-0),
+        var(--rank-bg-0) 33.33%,
+        var(--rank-bg-1) 33.33%,
+        var(--rank-bg-1) 66.67%,
+        var(--rank-bg-2) 66.67%,
+        var(--rank-bg-2)
+      );
+    }
+
+    .steps-nums {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      font-size: calc(2cqw + 10px);
+      color: #fffb;
+      contain: strict;
+    }
+
+    .bar-ratio {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      transform: translateX(calc(var(--ratio, 0%) - 100%));
+      transition: transform 0.2s linear;
+      /* will-change: transform; */
+      contain: size paint;
+    }
+
+    .steps-fill {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        to right,
+        var(--rank-0),
+        var(--rank-0) 33.33%,
+        var(--rank-1) 33.33%,
+        var(--rank-1) 66.67%,
+        var(--rank-2) 66.67%,
+        var(--rank-2)
+      );
+      transform: translateX(calc(100% - var(--ratio, 0%)));
+      transition: transform 0.2s linear;
+      /* will-change: transform; */
+      contain: strict;
+    }
+
+    .steps-flash {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background-color: #fff;
+      animation: steps-flash 0.1s steps(2, jump-none) 3 paused;
+      width: calc(100% / 3 * var(--rank, 0));
+      /* will-change: opacity, width; */
+      contain: strict;
+    }
+
+    @keyframes steps-flash {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .bar.fever {
+      opacity: 0;
+      background-color: var(--bg-light-1);
+      animation: fever-show 0.2s 0.3s forwards paused, fever-hide 0.2s 0.2s backwards paused;
+      /* will-change: opacity; */
+    }
+
+    @keyframes fever-show {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fever-hide {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .bar-ratio.fever {
+      background-color: var(--fever-0);
+    }
+
+    .fever-blink {
+      height: 100%;
+      background-color: var(--fever-1);
+      animation: fever-blink 0.2s steps(2, jump-none) infinite;
+      /* will-change: opacity; */
+    }
+
+    @keyframes fever-blink {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .rank-labels {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      contain: strict;
+    }
+
+    .rank-label {
+      font-size: calc(2.6cqw + 13px);
+      opacity: 0;
+      color: #888;
+      --x-text-stroke-color: calc(0.4cqw + 2px);
+      --x-text-stroke-color: #fff;
+      --x-text-shadow-y: 0;
+      animation: rank-label 0.2s ease-in forwards paused;
+      /* will-change: opacity, transform, filter; */
+    }
+
+    .rank-label.rank-3 {
+      animation: rank-label 0.3s 0.2s ease-in forwards paused;
+    }
+
+    @keyframes rank-label {
+      from {
+        opacity: 1;
+        transform: scale(1.5);
+        filter: contrast(0) brightness(2);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+        filter: contrast(1) brightness(1);
+      }
+    }
+  </style>
+</template>

@@ -1,0 +1,130 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { se } from '@/r.js'
+  import '../x-text.m.html'
+
+  class EffectPressStart extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    enter() {
+      this.anime.cancel()
+      this.anime.play('enter-beet', 'enter-flash', 'glow')
+      se.gameStart.play()
+    }
+  }
+
+  customElements.define('effect-press-start', EffectPressStart)
+</script>
+
+<template>
+  <div class="content">
+    <x-text class="text glow">PRESS TO START</x-text>
+    <x-text class="text" deco>PRESS TO START</x-text>
+  </div>
+
+  <style>
+    .content {
+      position: relative;
+      width: max-content;
+      animation: show 0.4s 2s ease-out backwards;
+      /* will-change: opacity; */
+    }
+
+    @keyframes show {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .text {
+      font-size: calc(1.8cqw + 18px);
+      --x-text-stroke-width: calc(0.2cqw + 2px);
+      --x-text-shadow-y: 0;
+      color: var(--accent-light);
+      white-space: nowrap;
+      animation: standby 1.6s ease-in infinite, enter-beet 1.6s ease-in paused,
+        enter-flash 0.1s steps(2, jump-none) 8 paused;
+      /* will-change: filter, transform; */
+    }
+
+    @keyframes standby {
+      0% {
+        filter: brightness(1.5);
+        transform: scale(1.02);
+        animation-timing-function: ease-out;
+      }
+      20% {
+        transform: scale(1);
+      }
+      50% {
+        filter: brightness(1);
+      }
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes enter-beet {
+      0% {
+        transform: scale(1.1);
+        animation-timing-function: ease-out;
+      }
+      20% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes enter-flash {
+      from {
+        filter: brightness(1.5);
+      }
+      to {
+        filter: brightness(1);
+      }
+    }
+
+    .text.glow {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      color: #fff;
+      --x-text-stroke-color: #fff;
+      animation: glow 1.6s infinite;
+      /* will-change: opacity, transform; */
+    }
+
+    @keyframes glow {
+      0% {
+        opacity: 1;
+        transform: scale(1, 1);
+        animation-timing-function: ease-out;
+      }
+      50% {
+        opacity: 0;
+        transform: scale(1.5, 2.5);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.5, 2.5);
+      }
+    }
+  </style>
+</template>

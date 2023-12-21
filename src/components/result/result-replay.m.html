@@ -1,0 +1,102 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+  import { store } from '@/r.js'
+  import { getKeyLog } from '@/keys.js'
+  import { encodeReplayCode, getReplayUrl } from '@/helper.js'
+  import '../x-text.m.html'
+  import '../x-button.m.html'
+
+  class ResultReplay extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const share = this.shadowRoot.querySelector('.button.share')
+      const twitter = this.shadowRoot.querySelector('.button.twitter')
+      const replay = this.shadowRoot.querySelector('.button.replay')
+
+      share.addEventListener('click', () => this.openShare())
+      twitter.addEventListener('click', () => this.openTwitter())
+      replay.addEventListener('click', () => this.replay())
+
+      const ios = /Macintosh|Mac OS X|iPhone|iPad/i.test(navigator.userAgent)
+      const icon = this.shadowRoot.querySelector(ios ? '.icon.ios' : '.icon.std')
+      setCSSProps(icon, { '--display': 'block' })
+    }
+
+    getUrl() {
+      const code = encodeReplayCode({
+        seed: store.seed,
+        score: store.score,
+        hits: store.hits,
+        keyLog: getKeyLog(),
+      })
+      return getReplayUrl(code)
+    }
+
+    openShare() {
+      navigator.share({
+        title: 'FIRE MAX',
+        text: `SCORE: ${store.score.toLocaleString('en-US')} #firemax`,
+        url: this.getUrl(),
+      })
+    }
+
+    openTwitter() {
+      const params = {
+        text: `SCORE: ${store.score.toLocaleString('en-US')} #firemax\n${this.getUrl()}`,
+      }
+      window.open(`https://twitter.com/share?${new URLSearchParams(params)}`, '_blank', 'noreferrer')
+    }
+
+    replay() {
+      store.scene = 'play'
+      store.isReplay = true
+    }
+  }
+
+  customElements.define('result-replay', ResultReplay)
+</script>
+
+<template>
+  <x-text class="label">REPLAY</x-text>
+
+  <div class="content">
+    <x-button class="button share" large>
+      <img class="icon std" src="assets/icon-share.png" />
+      <img class="icon ios" src="assets/icon-share-ios.png" />
+    </x-button>
+    <x-button class="button twitter" large>
+      <img class="icon" src="assets/icon-twitter.png" />
+    </x-button>
+    <x-button class="button replay" large>
+      <img class="icon" src="assets/icon-play.png" />
+    </x-button>
+  </div>
+
+  <style>
+    .label {
+      display: block;
+      width: max-content;
+      margin: 0 auto;
+      color: #eee;
+      font-size: calc(2.6cqw + 13px);
+      --x-text-stroke-width: calc(0.3cqw + 1.5px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+    }
+
+    .content {
+      margin-top: calc(1.6cqw + 8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0 calc(1.6cqw + 4px);
+      max-width: var(--scene-width);
+    }
+
+    .button.share .icon {
+      display: var(--display, none);
+    }
+  </style>
+</template>

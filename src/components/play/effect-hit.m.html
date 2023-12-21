@@ -1,0 +1,201 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { se } from '@/r.js'
+
+  class EffectHit extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    show(type, chainStep) {
+      this.anime.cancel('color-a', 'color-b', 'color-wild')
+      this.anime.play(`color-${type}`, 'circle', 'conic', 'spark')
+      if (chainStep === 1) se.hit1.play()
+      else if (chainStep === 2) se.hit2.play()
+      else if (chainStep === 3) se.hit3.play()
+    }
+  }
+
+  customElements.define('effect-hit', EffectHit)
+</script>
+
+<template>
+  <div class="content">
+    <div class="circle"></div>
+    <div class="conic">
+      <div class="conic-bg"></div>
+    </div>
+    <div class="sparks">
+      <div class="spark" style="--i: 0"></div>
+      <div class="spark" style="--i: 1"></div>
+      <div class="spark" style="--i: 2"></div>
+      <div class="spark" style="--i: 3"></div>
+      <div class="spark" style="--i: 4"></div>
+      <div class="spark" style="--i: 5"></div>
+    </div>
+  </div>
+
+  <style>
+    .content {
+      position: absolute;
+      display: block;
+      left: 50%;
+      bottom: 30%;
+      animation: color-a 0s forwards paused, color-b 0s forwards paused, color-wild 0s forwards paused;
+      /* will-change: color; */
+      contain: size layout;
+    }
+
+    @keyframes color-a {
+      to {
+        color: var(--takibi-a);
+      }
+    }
+
+    @keyframes color-b {
+      to {
+        color: var(--takibi-b);
+      }
+    }
+
+    @keyframes color-wild {
+      to {
+        color: var(--fever-0);
+      }
+    }
+
+    .circle {
+      position: absolute;
+      top: calc(50% - 7cqw - 35px);
+      left: calc(50% - 7cqw - 35px);
+      width: calc(14cqw + 70px);
+      height: calc(14cqw + 70px);
+      border-radius: 50%;
+      background-color: currentColor;
+      box-sizing: border-box;
+      opacity: 0;
+      animation: circle 0.2s ease-in paused;
+      /* will-change: opacity, transform; */
+      contain: strict;
+    }
+
+    @keyframes circle {
+      0% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0);
+      }
+    }
+
+    .conic {
+      position: relative;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      animation: conic 0.4s 0.15s ease-out paused;
+      /* will-change: opacity, transform; */
+      contain: size;
+    }
+
+    @keyframes conic {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    .conic-bg {
+      position: absolute;
+      top: calc(-12cqw - 60px);
+      left: calc(-12cqw - 60px);
+      width: calc(24cqw + 120px);
+      height: calc(24cqw + 120px);
+      -webkit-mask-image: radial-gradient(closest-side, transparent, transparent 40%, white 70%, transparent 99%);
+      mask-image: radial-gradient(closest-side, transparent, transparent 40%, white 70%, transparent 99%);
+      background-image: repeating-conic-gradient(transparent 0, transparent 20deg, #fff 20deg, #fff 60deg);
+      opacity: 0.8;
+      animation: conic-bg 6s linear infinite;
+      /* will-change: transform; */
+      contain: strict;
+    }
+
+    @keyframes conic-bg {
+      from {
+        transform: rotate(360deg);
+      }
+      to {
+        transform: rotate(0deg);
+      }
+    }
+
+    .sparks {
+      position: relative;
+      animation: sparks 6s linear infinite;
+      /* will-change: transform; */
+      contain: size;
+    }
+
+    @keyframes sparks {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spark {
+      position: absolute;
+      left: calc(-2.4cqw - 12px);
+      top: calc(-2.4cqw - 12px);
+      width: calc(4.8cqw + 24px);
+      height: calc(4.8cqw + 24px);
+      background-color: currentColor;
+      -webkit-mask-image: url('assets/star.png');
+      -webkit-mask-size: contain;
+      mask-image: url('assets/star.png');
+      mask-size: contain;
+      opacity: 0;
+      --deg: calc(60deg * var(--i) + 30deg);
+      animation: spark 0.4s 0.15s ease-out paused;
+      /* will-change: transform, opacity; */
+      contain: strict;
+    }
+
+    @keyframes spark {
+      0% {
+        transform: rotate(var(--deg)) translateY(-50%) rotate(0deg) scale(1);
+        opacity: 0.5;
+        animation-timing-function: ease-out;
+      }
+      40% {
+        transform: rotate(var(--deg)) translateY(-180%) rotate(90deg) scale(1);
+      }
+      80% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: rotate(var(--deg)) translateY(-190%) rotate(120deg) scale(0.7);
+        opacity: 0;
+      }
+    }
+  </style>
+</template>

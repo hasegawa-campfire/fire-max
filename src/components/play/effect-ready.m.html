@@ -1,0 +1,332 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { se } from '@/r.js'
+  import '../x-text.m.html'
+
+  class EffectReady extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    play() {
+      this.anime.play()
+      for (let i = 0; i < 5; i++) {
+        se.ready.play(i * 0.05, i * 0.2 + 0.2)
+      }
+      for (let i = 0; i < 10; i++) {
+        se.readyCount.play(i * 0.12 + 0.3, i * 0.1 + 0.1)
+      }
+      se.go.play(1.5)
+    }
+
+    isFinished() {
+      return this.anime.isFinished('timing-dummy')
+    }
+  }
+
+  customElements.define('effect-ready', EffectReady)
+</script>
+
+<template>
+  <div class="bg"></div>
+
+  <div class="stars">
+    <div class="star" style="--i: 0"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 1"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 2"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 3"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 4"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 5"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 6"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 7"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 8"><div class="star-bg"></div></div>
+    <div class="star" style="--i: 9"><div class="star-bg"></div></div>
+  </div>
+
+  <div class="text">
+    <x-text class="char" style="--i: 0" deco>R</x-text>
+    <x-text class="char" style="--i: 1" deco>E</x-text>
+    <x-text class="char" style="--i: 2" deco>A</x-text>
+    <x-text class="char" style="--i: 3" deco>D</x-text>
+    <x-text class="char" style="--i: 4" deco>Y</x-text>
+  </div>
+
+  <div class="go flash">
+    <x-text>GO</x-text>
+  </div>
+
+  <div class="go">
+    <x-text deco>GO</x-text>
+  </div>
+
+  <style>
+    :host {
+      display: contents;
+      pointer-events: none;
+    }
+
+    .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      color: #ddd;
+      font-size: 15cqw;
+      --x-text-stroke-width: 1.2cqw;
+      --x-text-shadow-y: 0.8cqw;
+      opacity: 0;
+      z-index: 9;
+      animation: timing-dummy 1.5s, text 1.3s paused;
+      /* will-change: opacity; */
+    }
+
+    @keyframes timing-dummy {
+      from {
+        transform: translate(-50%, -50%);
+      }
+      to {
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    @keyframes text {
+      0% {
+        opacity: 1;
+      }
+      85% {
+        opacity: 1;
+        animation-timing-function: ease-in;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .char {
+      opacity: 0;
+      animation: char 2.5s calc(0.05s * var(--i)) forwards paused;
+      /* will-change: opacity, transform; */
+    }
+
+    @keyframes char {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+        animation-timing-function: ease-out;
+      }
+      5% {
+        transform: scale(1.5);
+        animation-timing-function: ease-in;
+      }
+      10% {
+        transform: scale(1);
+        animation-timing-function: linear;
+      }
+      100% {
+        transform: scale(0.75);
+        opacity: 1;
+      }
+    }
+
+    .go {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ddd;
+      font-size: 25cqw;
+      --x-text-stroke-width: 1.5cqw;
+      --x-text-shadow-y: 1cqw;
+      opacity: 0;
+      z-index: 9;
+      animation: go 0.8s 1.5s paused;
+      /* will-change: opacity, transform, filter; */
+    }
+
+    @keyframes go {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+        animation-timing-function: ease-out;
+      }
+      10% {
+        transform: translate(-50%, -50%) scale(1.5);
+        filter: brightness(1.5);
+        animation-timing-function: ease-in;
+      }
+      20% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+        animation-timing-function: linear;
+      }
+      80% {
+        opacity: 1;
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.95);
+        opacity: 0;
+        filter: brightness(1);
+      }
+    }
+
+    .go.flash {
+      color: #fff;
+      --x-text-stroke-color: #fff;
+      animation: go-flash 1s 1.5s paused;
+      /* will-change: opacity, transform; */
+    }
+
+    @keyframes go-flash {
+      0% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1);
+        animation-timing-function: ease-out;
+      }
+      50% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(3);
+        animation-timing-function: ease-out;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(3);
+      }
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0;
+      z-index: 9;
+      animation: bg 1.4s 0.3s ease-out paused;
+      /* will-change: opacity; */
+      contain: strict;
+    }
+
+    @keyframes bg {
+      0% {
+        opacity: 0;
+      }
+      85.7% {
+        opacity: 0.4;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .stars {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 9;
+      animation: star-fall 0.5s 1.5s paused;
+      /* will-change: transform; */
+      contain: layout size;
+    }
+
+    @keyframes star-fall {
+      0% {
+        transform: translateY(0cqw);
+        animation-timing-function: ease-out;
+      }
+      20% {
+        transform: translateY(-10cqw);
+        animation-timing-function: ease-in;
+      }
+      100% {
+        transform: translateY(25cqw);
+      }
+    }
+
+    .star {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      --deg: calc(36deg * var(--i));
+      --n-deg: calc(-36deg * var(--i));
+      opacity: 0;
+      transform: rotate(var(--deg)) translateY(-20cqw) rotate(var(--n-deg));
+      animation: star-alpha 0.4s 1.5s ease-in backwards paused, star-move 0.5s 1.5s ease-out paused;
+      /* will-change: opacity, transform; */
+      contain: layout size;
+    }
+
+    @keyframes star-alpha {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes star-move {
+      0% {
+        transform: rotate(var(--deg)) translateY(-20cqw) rotate(var(--n-deg)) scale(3);
+      }
+      100% {
+        transform: rotate(var(--deg)) translateY(-75cqw) rotate(var(--n-deg)) scale(1);
+      }
+    }
+
+    .star-bg {
+      position: absolute;
+      left: -3cqw;
+      top: -3cqw;
+      width: 6cqw;
+      height: 6cqw;
+      opacity: 0;
+      -webkit-mask-image: url('assets/star.png');
+      -webkit-mask-size: contain;
+      mask-image: url('assets/star.png');
+      mask-size: contain;
+      animation: star-color 3s calc(0.12s * var(--i) + 0.3s) paused, star-roll 1.8s linear infinite paused;
+      /* will-change: opacity, transform; */
+      contain: strict;
+    }
+
+    @keyframes star-color {
+      0% {
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.67;
+      }
+      100% {
+        opacity: 0.67;
+      }
+    }
+
+    @keyframes star-roll {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .star:nth-child(odd) .star-bg {
+      background-color: var(--takibi-a);
+    }
+
+    .star:nth-child(even) .star-bg {
+      background-color: var(--takibi-b);
+    }
+  </style>
+</template>

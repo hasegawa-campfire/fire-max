@@ -1,0 +1,144 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setAudioVolume } from '@/lib/audio.js'
+  import { CSSProp } from '@/lib/css-prop.js'
+  import { store, bgm } from '@/r.js'
+  import { getReplayQuery, clearReplayQuery, isMute, setMute } from '@/helper.js'
+  import { isAnyKeyDown } from '@/keys.js'
+  import '../x-button.m.html'
+  import '../takibi-san.m.html'
+  import './title-bg.m.html'
+  import './title-logo.m.html'
+  import './title-hi-score.m.html'
+  import './modal-replay.m.html'
+  import './modal-help.m.html'
+  import './effect-press-start.m.html'
+
+  class TitleRoot extends HTMLElement {
+    name = 'title'
+    #pressStart
+    muteOffDisplay
+    muteOnDisplay
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      this.#pressStart = this.shadowRoot.querySelector('effect-press-start')
+
+      this.muteOffDisplay = new CSSProp(this.shadowRoot.querySelector('.mute-icon.off'), '--display')
+      this.muteOnDisplay = new CSSProp(this.shadowRoot.querySelector('.mute-icon.on'), '--display')
+      if (isMute()) this.muteOnDisplay.value = 'block'
+      else this.muteOffDisplay.value = 'block'
+
+      const clickable = this.shadowRoot.querySelector('.clickable')
+      const muteButton = this.shadowRoot.querySelector('.mute-button')
+      const helpButton = this.shadowRoot.querySelector('.help-button')
+      const helpModal = this.shadowRoot.querySelector('modal-help')
+      const replayModal = this.shadowRoot.querySelector('modal-replay')
+
+      const code = getReplayQuery()
+      if (code) replayModal.open(code)
+
+      clickable.addEventListener('click', () => this.goPlay())
+
+      muteButton.addEventListener('click', () => {
+        const mute = !isMute()
+        setMute(mute)
+        setAudioVolume(mute ? 0 : 0.21)
+        this.muteOffDisplay.value = mute ? 'none' : 'block'
+        this.muteOnDisplay.value = mute ? 'block' : 'none'
+      })
+
+      helpButton.addEventListener('click', () => {
+        helpModal.open()
+      })
+
+      bgm.title.play(0.7)
+    }
+
+    update() {
+      if (isAnyKeyDown()) this.goPlay()
+    }
+
+    goPlay() {
+      if (store.scene === 'title') {
+        store.isReplay = false
+        store.scene = 'play'
+        store.leaveSpeed = 0.5
+        this.#pressStart.enter()
+      }
+    }
+
+    fin() {
+      bgm.title.stop()
+      clearReplayQuery()
+    }
+  }
+
+  customElements.define('title-root', TitleRoot)
+</script>
+
+<template>
+  <title-bg></title-bg>
+  <div class="clickable"></div>
+
+  <div class="container">
+    <div class="buttons">
+      <x-button class="mute-button">
+        <img class="mute-icon off" src="assets/icon-sound.png" />
+        <img class="mute-icon on" src="assets/icon-mute.png" />
+      </x-button>
+      <x-button class="help-button">
+        <img src="assets/icon-help.png" />
+      </x-button>
+    </div>
+    <title-logo></title-logo>
+    <effect-press-start></effect-press-start>
+    <title-hi-score class="hi-score"></title-hi-score>
+    <modal-help></modal-help>
+    <modal-replay></modal-replay>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      contain: size;
+    }
+
+    .clickable {
+      position: fixed;
+      inset: 0;
+      contain: strict;
+    }
+
+    .container {
+      height: 100%;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr 1fr auto;
+      gap: calc(0.8cqh + 8px) 0;
+      justify-items: center;
+      pointer-events: none;
+      contain: size;
+    }
+
+    .buttons {
+      justify-self: end;
+      display: flex;
+      gap: 0 calc(1.6cqw + 8px);
+    }
+
+    .mute-icon {
+      display: var(--display, none);
+    }
+
+    title-logo {
+      justify-self: stretch;
+    }
+  </style>
+</template>

@@ -1,0 +1,168 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { store, loop, se } from '@/r.js'
+  import '../x-text.m.html'
+
+  class StatusTime extends HTMLElement {
+    #first
+    #last
+    anime = new CSSAnime()
+    finalCount = 3
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#first = this.shadowRoot.querySelector('.first')
+      this.#last = this.shadowRoot.querySelector('.last')
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    update() {
+      const time = (Math.ceil((store.time * loop.frameTime) / 100) / 10).toFixed(1).padStart(4, '0')
+      this.#first.setText(time.slice(0, 2))
+      this.#last.setText(time.slice(2))
+
+      if (0 < store.time && store.time <= 10 * loop.fps && !this.anime.isRunning('count-final')) {
+        this.anime.play('count-final')
+      }
+
+      if (0 < store.time && store.time <= this.finalCount * loop.fps) {
+        se.timeCount.play()
+        this.anime.play('count')
+        this.finalCount--
+      }
+
+      if (store.time <= 0 && this.anime.isRunning('count-final')) {
+        this.anime.cancel('count-final')
+      }
+    }
+  }
+
+  customElements.define('status-time', StatusTime)
+</script>
+
+<template>
+  <div class="bg"></div>
+  <div class="bg-fill"></div>
+  <div class="count-list">
+    <x-text class="count first">60</x-text>
+    <x-text class="count last">.0</x-text>
+  </div>
+  <div class="label">TIME</div>
+
+  <style>
+    :host {
+      position: relative;
+      margin-top: calc((9cqw + 45px) * -0.4);
+      width: calc(9cqw + 45px);
+      height: calc(9cqw + 45px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: calc(0.3cqw + 1.5px) #888 solid;
+      box-shadow: 0 calc(0.4cqw + 2px) 0 0 #888;
+      background-color: #fff;
+      box-sizing: border-box;
+      contain: size;
+    }
+
+    .bg {
+      --bpm: calc(60s / 89);
+      position: absolute;
+      inset: calc(0.24cqw + 1.2px);
+      background-image: repeating-conic-gradient(
+        var(--bg-light-2) 0deg,
+        var(--bg-light-2) 30deg,
+        var(--bg-light-1) 30deg,
+        var(--bg-light-1) 60deg,
+        var(--bg-light-0) 60deg,
+        var(--bg-light-0) 90deg
+      );
+      -webkit-mask-image: radial-gradient(
+        closest-side,
+        transparent 0%,
+        transparent calc(100% - 0.56cqw - 2.8px),
+        #fff calc(100% - 0.56cqw - 2.8px),
+        #fff 100%
+      );
+      mask-image: radial-gradient(
+        closest-side,
+        transparent 0%,
+        transparent calc(100% - 0.56cqw - 2.8px),
+        #fff calc(100% - 0.56cqw - 2.8px),
+        #fff 100%
+      );
+      border-radius: 50%;
+      animation: bg calc(3 * var(--bpm)) steps(3) infinite;
+      contain: strict;
+      /* will-change: transform; */
+    }
+
+    @keyframes bg {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(90deg);
+      }
+    }
+
+    .count-list {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      animation: count 0.3s ease-in paused;
+      /* will-change: transform, filter; */
+    }
+
+    @keyframes count {
+      from {
+        transform: scale(1.1);
+        filter: contrast(0.2) brightness(1.8);
+      }
+      to {
+        transform: scale(1);
+        filter: contrast(1) brightness(1);
+      }
+    }
+
+    .count {
+      font-size: calc(2.8cqw + 14px);
+      color: #888;
+      --x-text-stroke-color: transparent;
+      animation: count-final 0.2s infinite alternate paused;
+      /* will-change: color; */
+    }
+
+    @keyframes count-final {
+      from {
+        color: var(--fever-0);
+        animation-timing-function: ease-in-out;
+      }
+      to {
+        color: var(--fever-1);
+        animation-timing-function: ease-in-out;
+      }
+    }
+
+    .count.last {
+      font-size: calc(2.2cqw + 11px);
+    }
+
+    .label {
+      left: 0;
+      right: 0;
+      bottom: calc(1.6cqw + 8px);
+      position: absolute;
+      font-size: calc(1.2cqw + 6px);
+      text-align: center;
+      color: #888;
+      contain: layout;
+    }
+  </style>
+</template>

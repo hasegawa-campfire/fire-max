@@ -1,0 +1,93 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { store, se } from '@/r.js'
+  import '../x-text.m.html'
+
+  class ResultScore extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const score = String(Math.min(store.score, 99999999)).padStart(8, '0')
+
+      this.shadowRoot.querySelectorAll('.num').forEach((el, i) => {
+        el.setText(score[i])
+        se.resultScore.play(i * 0.04 + 2.1)
+      })
+    }
+  }
+
+  customElements.define('result-score', ResultScore)
+</script>
+
+<template>
+  <div class="nums first">
+    <x-text class="num" style="--i: 0" deco>0</x-text>
+    <x-text class="num" style="--i: 1" deco>0</x-text>
+    <x-text class="num" style="--i: 2" deco>0</x-text>
+    <x-text class="num" style="--i: 3" deco>0</x-text>
+  </div>
+  <div class="nums last">
+    <x-text class="num" style="--i: 4" deco>0</x-text>
+    <x-text class="num" style="--i: 5" deco>0</x-text>
+    <x-text class="num" style="--i: 6" deco>0</x-text>
+    <x-text class="num" style="--i: 7" deco>0</x-text>
+  </div>
+
+  <style>
+    :host {
+      margin: 0 auto;
+      width: max-content;
+      display: flex;
+      gap: 0 2px;
+      align-items: baseline;
+    }
+
+    .nums {
+      display: flex;
+      gap: 0 1px;
+      font-size: calc(6cqw + 30px);
+      color: var(--accent-light);
+      --x-text-stroke-width: calc(0.4cqw + 2px);
+      --x-text-shadow-y: calc(0.3cqw + 1.5px);
+    }
+
+    .nums.last {
+      font-size: calc(4.8cqw + 24px);
+    }
+
+    .num {
+      position: relative;
+      animation: num 0.2s calc(0.04s * var(--i) + 2.1s) backwards, flash 3s calc(0.05s * var(--i) + 4.1s) infinite;
+      /* will-change: filter; */
+    }
+
+    @keyframes num {
+      0% {
+        opacity: 0;
+        top: 0;
+        animation-timing-function: ease-out;
+      }
+      50% {
+        opacity: 1;
+        top: -40px;
+        animation-timing-function: ease-in;
+      }
+      100% {
+        top: 0;
+      }
+    }
+
+    @keyframes flash {
+      0% {
+        filter: brightness(1.5);
+      }
+      10% {
+        filter: brightness(1);
+      }
+      100% {
+        filter: brightness(1);
+      }
+    }
+  </style>
+</template>

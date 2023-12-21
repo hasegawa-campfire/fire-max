@@ -1,0 +1,298 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import '../x-text.m.html'
+
+  class TitleLogo extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+  }
+
+  customElements.define('title-logo', TitleLogo)
+</script>
+
+<template>
+  <div class="frame">
+    <div class="frame-border top"></div>
+    <div class="frame-border bottom"></div>
+    <div class="logo-wrap">
+      <div class="stars">
+        <div class="star" style="--i: 2; --x: -2.3; --s: 0.6">
+          <div class="star-bg"></div>
+          <div class="star-image"></div>
+          <div class="star-image blink"></div>
+        </div>
+        <div class="star" style="--i: 1; --x: -1.5; --s: 0.8">
+          <div class="star-bg"></div>
+          <div class="star-image"></div>
+          <div class="star-image blink"></div>
+        </div>
+        <div class="star" style="--i: 0; --x: -0.5; --s: 1">
+          <div class="star-bg"></div>
+          <div class="star-image"></div>
+          <div class="star-image blink"></div>
+        </div>
+      </div>
+
+      <div class="logo" style="--i: 0">
+        <x-text class="logo-char" deco="a6">F</x-text>
+        <x-text class="logo-char blink" deco="a6">F</x-text>
+      </div>
+      <div class="logo" style="--i: 1">
+        <x-text class="logo-char" deco="a6">I</x-text>
+        <x-text class="logo-char blink" deco="a6">I</x-text>
+      </div>
+      <div class="logo" style="--i: 2">
+        <x-text class="logo-char" deco="a6">R</x-text>
+        <x-text class="logo-char blink" deco="a6">R</x-text>
+      </div>
+      <div class="logo" style="--i: 3">
+        <x-text class="logo-char" deco="a6">E</x-text>
+        <x-text class="logo-char blink" deco="a6">E</x-text>
+      </div>
+      <div class="logo hidden" style="--i: 0">
+        <x-text class="logo-char">.</x-text>
+      </div>
+      <div class="logo" style="--i: 4">
+        <x-text class="logo-char" deco="a6">M</x-text>
+        <x-text class="logo-char blink" deco="a6">M</x-text>
+      </div>
+      <div class="logo" style="--i: 5">
+        <x-text class="logo-char" deco="a6">A</x-text>
+        <x-text class="logo-char blink" deco="a6">A</x-text>
+      </div>
+      <div class="logo" style="--i: 6">
+        <x-text class="logo-char" deco="a6">X</x-text>
+        <x-text class="logo-char blink" deco="a6">X</x-text>
+      </div>
+
+      <div class="stars">
+        <div class="star" style="--i: 0; --x: 0.5; --s: 1">
+          <div class="star-image"></div>
+          <div class="star-image blink"></div>
+        </div>
+        <div class="star" style="--i: 1; --x: 1.5; --s: 0.8">
+          <div class="star-image"></div>
+          <div class="star-image blink"></div>
+        </div>
+        <div class="star" style="--i: 2; --x: 2.3; --s: 0.6">
+          <div class="star-image"></div>
+          <div class="star-image blink"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    :host {
+      position: relative;
+      display: block;
+    }
+
+    .frame {
+      position: absolute;
+      left: calc(50% - 50cqw);
+      right: calc(50% - 50cqw);
+      top: 50%;
+      background-color: #fff;
+      max-height: 100%;
+      height: calc(10cqw + 80px);
+      padding: 4px 0;
+      border-top: calc(0.5cqw + 2.5px) #888 solid;
+      border-bottom: calc(1cqw + 5px) #888 solid;
+      box-sizing: border-box;
+      transform: translateY(-50%);
+      animation: show 0.2s 0.5s ease-out backwards;
+      /* will-change: transform; */
+      contain: strict;
+    }
+
+    @keyframes show {
+      from {
+        transform: translateY(-50%) scaleY(0);
+      }
+      to {
+        transform: translateY(-50%) scaleY(1);
+      }
+    }
+
+    .frame-border {
+      --size: calc(2cqw + 10px);
+      --bpm: calc(60s / 145);
+      position: absolute;
+      left: 0;
+      right: calc(var(--size) * -3);
+      height: calc(1cqw + 5px);
+      background-image: repeating-linear-gradient(
+        to right,
+        var(--bg-light-0) 0,
+        var(--bg-light-0) calc(var(--size) * 1),
+        var(--bg-light-1) calc(var(--size) * 1),
+        var(--bg-light-1) calc(var(--size) * 2),
+        var(--bg-light-2) calc(var(--size) * 2),
+        var(--bg-light-2) calc(var(--size) * 3)
+      );
+      contain: strict;
+      /* will-change: transform; */
+    }
+
+    .frame-border.top {
+      top: calc(0.4cqw + 2px);
+      animation: frame-border-top calc(3 * var(--bpm)) steps(3) infinite;
+    }
+
+    @keyframes frame-border-top {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(calc(var(--size) * -3));
+      }
+    }
+
+    .frame-border.bottom {
+      bottom: calc(0.4cqw + 2px);
+      animation: frame-border-bottom calc(3 * var(--bpm)) steps(3) infinite;
+    }
+
+    @keyframes frame-border-bottom {
+      from {
+        transform: scaleX(-1) translateX(calc(var(--size) * 3));
+      }
+      to {
+        transform: scaleX(-1) translateX(0);
+      }
+    }
+
+    .frame-bg {
+      position: absolute;
+      inset: calc(0.5cqw + 2.5px) 0;
+      border-top: var(--bg-light-1) calc(0.5cqw + 2.5px) solid;
+      border-bottom: var(--bg-light-1) calc(0.5cqw + 2.5px) solid;
+      contain: strict;
+    }
+
+    .logo-wrap {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      animation: logo-show 0.3s 0.9s ease-in backwards;
+      contain: layout;
+    }
+
+    @keyframes logo-show {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .logo {
+      position: relative;
+    }
+
+    .logo.hidden {
+      visibility: hidden;
+    }
+
+    .logo-char {
+      font-size: calc(7cqw + 35px);
+      color: var(--fever-0);
+      --x-text-stroke-width: calc(0.8cqw + 4px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+    }
+
+    .logo-char.blink {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      color: var(--fever-1);
+      animation: logo-blink 0.4s calc(0.1s * var(--i)) infinite alternate;
+      /* will-change: opacity; */
+      contain: layout;
+    }
+
+    @keyframes logo-blink {
+      from {
+        opacity: 0;
+        animation-timing-function: ease-in-out;
+      }
+      to {
+        opacity: 1;
+        animation-timing-function: ease-in-out;
+      }
+    }
+
+    .stars {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      width: calc(4cqw + 20px);
+      opacity: 0.5;
+    }
+
+    .star {
+      position: absolute;
+      inset: 0;
+      transform: translateX(calc(100% * var(--x))) scale(var(--s));
+      animation: star-move 5s 1.6s backwards;
+      /* will-change: opacity, transform; */
+      backface-visibility: hidden;
+      contain: strict;
+    }
+
+    @keyframes star-move {
+      0% {
+        opacity: 0;
+        transform: translateX(0%) scale(var(--s));
+        animation-timing-function: ease-out;
+      }
+      5% {
+        opacity: 1;
+        transform: translateX(calc(80% * var(--x))) scale(var(--s));
+        animation-timing-function: ease-out;
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(calc(100% * var(--x))) scale(var(--s));
+      }
+    }
+
+    .star-image {
+      position: absolute;
+      inset: 0;
+      -webkit-mask-image: url('assets/star.png');
+      -webkit-mask-size: contain;
+      mask-image: url('assets/star.png');
+      mask-size: contain;
+      background-color: var(--takibi-a);
+      backface-visibility: hidden;
+      contain: strict;
+    }
+
+    .star-image.blink {
+      opacity: 0;
+      background-color: var(--takibi-b);
+      animation: star-blink 0.8s calc(0.2s * var(--i)) infinite alternate;
+      /* will-change: opacity; */
+    }
+
+    @keyframes star-blink {
+      from {
+        opacity: 0;
+        animation-timing-function: ease-in-out;
+      }
+      to {
+        opacity: 1;
+        animation-timing-function: ease-in-out;
+      }
+    }
+  </style>
+</template>

@@ -1,0 +1,160 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { random, store, loop } from '@/r.js'
+  import { isKeyDown, setKeyDown } from '@/keys.js'
+  import * as param from '@/param.js'
+  import './grid-billboard.m.html'
+
+  class GridCell extends HTMLElement {
+    #billboard
+    index
+    show = false
+    type = null
+    laps = 0
+    rank = 0
+    time = Infinity
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#billboard = this.shadowRoot.querySelector('grid-billboard')
+      this.index = +this.getAttribute('index')
+      this.addEventListener('pointerdown', () => {
+        if (store.playPhase === 'play') setKeyDown(this.index)
+      })
+    }
+
+    isReady() {
+      return !this.type && this.time >= 0
+    }
+
+    showTakibi(fast) {
+      if (this.type) return
+      const isBad = !fast && random.next() < param.badRate(store)
+      this.show = true
+      this.type = isBad ? 'bad' : store.isFever ? 'wild' : random.next() < 0.5 ? 'a' : 'b'
+      this.laps = store.laps
+      this.rank = store.rank
+      this.time = 0
+      this.#billboard.show(this.type, this.rank)
+      return true
+    }
+
+    addEffect(type, ...args) {
+      store.effects.push({ type, args, index: this.index })
+    }
+
+    update() {
+      this.time++
+
+      if ((this.type === 'a' || this.type === 'b') && this.rank < store.rank) {
+        this.rank = store.rank
+        if (store.isFever) this.type = 'wild'
+      }
+
+      if (isKeyDown(this.index)) {
+        if (['a', 'b', 'wild'].includes(this.type)) {
+          const type = this.type
+          const score = param.hitScore(this)
+          store.score += score
+          if (!store.isFever) store.rankExp++
+          store.hits[this.rank]++
+          this.addEffect('score', score)
+
+          const chainKeep = this.type === 'wild' || store.chainSteps.every((t) => t === 'wild' || t === this.type)
+
+          if (!chainKeep) {
+            store.chainSteps = []
+            store.chainEffect = true
+            store.chain = 0
+          }
+
+          const chainStep = store.chainSteps.push(this.type)
+
+          if (chainStep === 3) {
+            store.chainEffect = store.chainSteps
+            store.chainSteps = []
+            const chain = param.chainScore(store)
+            store.score += chain
+            store.chain++
+            this.addEffect('chain', chain)
+          }
+
+          this.time = -(param.coolTime(this) * loop.fps)
+          this.show = false
+          this.type = null
+          this.#billboard.hit()
+          this.addEffect('hit', type, chainStep)
+        } else {
+          const type = this.type
+          this.time = -(param.coolTime(this) * loop.fps)
+          this.show = false
+          this.type = null
+          store.chainSteps = []
+          store.chainEffect = true
+          store.chain = 0
+          if (store.isFever) store.feverTime -= param.ngFeverTime(this) * loop.fps
+          else store.rankExp -= param.ngRankExp(this)
+          if (type) this.#billboard.hit()
+          if (type === 'bad') this.addEffect('hit-bad')
+          this.addEffect('ng', type)
+        }
+      }
+
+      const limit = param.timeLimit(this)
+
+      if (this.show && this.time > (limit - 0.2) * loop.fps) {
+        this.show = false
+        this.#billboard.hide()
+      }
+
+      if (this.type && this.time > limit * loop.fps) {
+        this.time = -(param.coolTime(this) * loop.fps)
+        this.show = false
+        this.type = null
+        this.#billboard.clear()
+      }
+
+      this.#billboard.update()
+    }
+  }
+
+  customElements.define('grid-cell', GridCell)
+</script>
+
+<template>
+  <grid-billboard></grid-billboard>
+
+  <style>
+    :host {
+      position: relative;
+      display: block;
+      background-color: var(--bg-light-0);
+      aspect-ratio: 1 / 1;
+      transform-style: preserve-3d;
+      /* border: 10px currentColor solid; */
+      pointer-events: all;
+      contain: size;
+    }
+
+    :host([index='1']),
+    :host([index='3']),
+    :host([index='5']),
+    :host([index='7']) {
+      background-color: var(--bg-light-1);
+    }
+
+    grid-billboard {
+      position: absolute;
+      bottom: 25%;
+      transform: rotateX(-45deg);
+      transform-origin: bottom;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      pointer-events: none;
+      contain: layout size;
+    }
+  </style>
+</template>

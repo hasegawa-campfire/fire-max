@@ -1,0 +1,78 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+
+  class EffectTakibi extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const el = this.shadowRoot.querySelector('.fall')
+
+      const scale = Math.random() + 0.5
+      const duration = 10 / scale
+      const rollDuration = 14 / scale
+
+      setCSSProps(el, {
+        '--scale': `${scale.toFixed(2)}`,
+        '--duration': `${duration.toFixed(2)}s`,
+        '--z-index': `${(scale * 100) | 0}`,
+        '--roll-duration': `${rollDuration.toFixed(2)}s`,
+        '--roll-delay': `${(Math.random() * -8).toFixed(2)}s`,
+      })
+    }
+  }
+
+  customElements.define('effect-takibi', EffectTakibi)
+</script>
+
+<template>
+  <div class="fall">
+    <div class="roll">
+      <slot></slot>
+    </div>
+  </div>
+
+  <style>
+    .fall {
+      position: absolute;
+      top: 0;
+      z-index: var(--z-index);
+      left: calc(100% / (var(--len) + 1) * var(--i));
+      animation: fall var(--duration) calc(var(--duration) / var(--len) * var(--j) * -1) infinite linear;
+      /* will-change: transform; */
+      contain: layout size;
+    }
+
+    @keyframes fall {
+      from {
+        transform: translateY(calc(0cqh - 7.5cqw - 37.5px));
+      }
+      to {
+        transform: translateY(calc(100cqh + 7.5cqw + 37.5px));
+      }
+    }
+
+    .roll {
+      position: absolute;
+      left: 0;
+      top: 0;
+      animation: roll var(--roll-duration) var(--roll-delay) linear infinite;
+      /* will-change: transform; */
+      contain: layout;
+    }
+
+    .roll ::slotted(takibi-san) {
+      width: calc(10cqw + 50px);
+    }
+
+    @keyframes roll {
+      from {
+        transform: translate(-50%, -50%) scale(var(--scale)) rotate(0deg);
+      }
+      to {
+        transform: translate(-50%, -50%) scale(var(--scale)) rotate(360deg);
+      }
+    }
+  </style>
+</template>

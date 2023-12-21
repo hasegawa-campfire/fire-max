@@ -1,0 +1,74 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { store } from '@/r.js'
+  import '../x-text.m.html'
+  import '../takibi-san.m.html'
+
+  class ResultDetail extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      this.shadowRoot.querySelectorAll('.num').forEach((el, i) => {
+        el.setText(store.hits[i])
+      })
+    }
+  }
+
+  customElements.define('result-detail', ResultDetail)
+</script>
+
+<template>
+  <div class="cell">
+    <takibi-san type="a" rank="0" basis="width" shadow></takibi-san>
+    <takibi-san type="b" rank="0" basis="width" shadow></takibi-san>
+    <x-text class="num">0</x-text>
+  </div>
+  <div class="cell">
+    <takibi-san type="a" rank="1" basis="width" shadow></takibi-san>
+    <takibi-san type="b" rank="2" basis="width" shadow></takibi-san>
+    <x-text class="num">0</x-text>
+  </div>
+  <div class="cell">
+    <takibi-san type="a" rank="2" basis="width" shadow></takibi-san>
+    <takibi-san type="b" rank="2" basis="width" shadow></takibi-san>
+    <x-text class="num">0</x-text>
+  </div>
+  <div class="cell">
+    <takibi-san type="wild" basis="width" shadow></takibi-san>
+    <takibi-san type="wild" basis="width" shadow></takibi-san>
+    <x-text class="num">0</x-text>
+  </div>
+
+  <style>
+    :host {
+      display: grid;
+      grid-template-rows: auto auto;
+      grid-template-columns: auto auto;
+      grid-auto-flow: column;
+      gap: calc(0.4cqh + 2px) 0;
+      justify-content: space-around;
+    }
+
+    .cell {
+      display: grid;
+      grid-template-columns: auto auto calc(6cqw + 30px);
+      align-items: center;
+      justify-items: end;
+      gap: 0 4px;
+      z-index: 0;
+    }
+
+    takibi-san {
+      position: relative;
+      width: calc(4cqw + 20px);
+    }
+
+    .num {
+      font-size: calc(2cqw + 10px);
+      --x-text-stroke-width: calc(0.3cqw + 1.5px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+      color: #fff;
+    }
+  </style>
+</template>

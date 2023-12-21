@@ -1,0 +1,87 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import '../x-text.m.html'
+
+  class ResultSection extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      const label = this.shadowRoot.querySelector('.label-text')
+      label.setText(this.getAttribute('label') ?? '')
+    }
+  }
+
+  customElements.define('result-section', ResultSection)
+</script>
+
+<template>
+  <div class="section">
+    <div class="section-label"><x-text class="label-text"></x-text></div>
+    <slot></slot>
+    <div class="separator"></div>
+  </div>
+
+  <style>
+    :host {
+      display: block;
+      position: relative;
+      margin: 0 auto;
+      max-width: var(--scene-width);
+      width: calc(50cqw + 250px);
+    }
+
+    .section {
+      background-color: #f8f8f888;
+      padding: calc(4cqh - 4px) calc(4cqw - 4px);
+      border-radius: 2px;
+      border: #ccc 2px solid;
+      box-shadow: 0 3px 0 #ccc;
+      animation: section-flash 3s calc(4.1s + var(--delay, 0s)) infinite;
+      /* will-change: background-color; */
+    }
+
+    @keyframes section-flash {
+      0% {
+        background-color: #f8f8f888;
+      }
+      5% {
+        background-color: #fffd;
+      }
+      10% {
+        background-color: #f8f8f888;
+      }
+      100% {
+        background-color: #f8f8f888;
+      }
+    }
+
+    .section-label {
+      position: absolute;
+      left: calc(-1.2cqw - 6px);
+      top: calc(-1.2cqw - 6px);
+      color: #aaa;
+      --x-text-stroke-color: transparent;
+      font-size: calc(1.2cqw + 6px);
+      border-radius: 2px;
+      border: #ccc 2px solid;
+      box-shadow: 0 2px 0 #ccc;
+      background-color: #fff;
+      padding: 2px 8px;
+      width: calc(10cqw + 50px);
+      contain: layout paint;
+    }
+
+    .separator {
+      display: none;
+      position: absolute;
+      left: calc(50% - 1px);
+      top: 0;
+      bottom: 0;
+      border-left: #ccc 2px solid;
+    }
+
+    :host([separator]) .separator {
+      display: block;
+    }
+  </style>
+</template>

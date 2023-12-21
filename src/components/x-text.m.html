@@ -1,0 +1,68 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { CSSProp } from '@/lib/css-prop.js'
+
+  class XText extends HTMLElement {
+    #text
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      const text = this.shadowRoot.querySelector('.text')
+      this.#text = new CSSProp(text, '--x-text-value')
+      this.setText(this.textContent?.trim() ?? '')
+    }
+
+    setText(value) {
+      this.#text.value = `'${value}'`
+    }
+  }
+
+  customElements.define('x-text', XText)
+</script>
+
+<template>
+  <span class="text"></span>
+  <style>
+    :host {
+      position: relative;
+      display: block;
+      width: max-content;
+    }
+
+    .text::before {
+      display: inline-block;
+      color: var(--x-text-stroke-color, #888);
+      content: var(--x-text-value, '');
+      -webkit-text-stroke-width: var(--x-text-stroke-width, 4px);
+      filter: drop-shadow(0 var(--x-text-shadow-y, 2px) 0px currentColor);
+    }
+
+    .text::after {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      content: var(--x-text-value);
+    }
+
+    :host([deco]) .text::after {
+      background-color: currentColor;
+      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      background-image: url('assets/halftone-bottom.png');
+      background-size: auto 0.5em;
+      background-position: left 0 bottom 0em;
+      background-repeat: repeat-x;
+    }
+
+    :host([deco='a3']) .text::after {
+      background-image: url('assets/halftone-bottom-a3.png');
+    }
+
+    :host([deco='a6']) .text::after {
+      background-image: url('assets/halftone-bottom-a6.png');
+    }
+  </style>
+</template>

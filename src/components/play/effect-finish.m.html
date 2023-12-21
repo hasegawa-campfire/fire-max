@@ -1,0 +1,116 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { se } from '@/r.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import '../x-text.m.html'
+
+  class EffectFinish extends HTMLElement {
+    anime = new CSSAnime()
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+    }
+
+    connectedCallback() {
+      this.anime.load(this.shadowRoot)
+    }
+
+    play() {
+      this.anime.play()
+      se.timeUp.play()
+    }
+
+    isFinished() {
+      return this.anime.isFinished('bg')
+    }
+
+    isFinishedAll() {
+      return this.anime.isFinished()
+    }
+  }
+
+  customElements.define('effect-finish', EffectFinish)
+</script>
+
+<template>
+  <div class="bg"></div>
+  <div class="text">
+    <x-text class="char" style="--i: -3">T</x-text>
+    <x-text class="char" style="--i: -2">I</x-text>
+    <x-text class="char" style="--i: -1">M</x-text>
+    <x-text class="char" style="--i: 0">E</x-text>
+    <x-text class="char hide" style="--i: 1">.</x-text>
+    <x-text class="char" style="--i: 2">U</x-text>
+    <x-text class="char" style="--i: 3">P</x-text>
+  </div>
+
+  <style>
+    :host {
+      display: contents;
+      pointer-events: none;
+    }
+
+    .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      transform: translate(-50%, -50%);
+      z-index: 9;
+      contain: layout;
+    }
+
+    .char {
+      position: relative;
+      top: 0;
+      opacity: 0;
+      color: #fff;
+      font-size: 12cqw;
+      --x-text-stroke-width: 1cqw;
+      --x-text-shadow-y: 0.7cqw;
+      animation: char 3s ease-out forwards paused;
+      /* will-change: opacity, transform; */
+    }
+
+    .char.hide {
+      visibility: hidden;
+    }
+
+    @keyframes char {
+      0% {
+        opacity: 0;
+        transform: translateY(-33%) translateX(0);
+      }
+      4% {
+        opacity: 1;
+        transform: translateY(0%) translateX(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0%) translateX(calc(1.5cqw * var(--i)));
+      }
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0;
+      z-index: 9;
+      animation: bg 0.5s 0.2s ease-out forwards paused;
+      /* will-change: opacity; */
+      contain: strict;
+    }
+
+    @keyframes bg {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 0.5;
+      }
+    }
+  </style>
+</template>

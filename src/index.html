@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>FIRE MAX</title>
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1" />
+<script type="importmap" data-prod-remove>
+  {
+    "imports": {
+      "@/": "./"
+    }
+  }
+</script>
+<script type="module">
+  const viewport = document.querySelector('meta[name="viewport"]')
+  function switchViewport() {
+    const value =
+      window.innerWidth >= 375 && window.innerHeight >= 375
+        ? 'width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1'
+        : window.innerWidth < window.innerHeight
+        ? 'width=375,user-scalable=no'
+        : 'height=375,user-scalable=no'
+    if (viewport.getAttribute('content') !== value) {
+      viewport.setAttribute('content', value)
+    }
+  }
+  addEventListener('resize', switchViewport, false)
+  switchViewport()
+</script>
+<link rel="icon" href="./assets/favicon.ico" sizes="any" />
+<link rel="icon" href="./assets/favicon-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="./assets/favicon-apple-touch-icon.png" />
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#ff6161" />
+<meta name="description" content="焚き火さんをあつめて目指せハイスコア！シンプルなモグラ叩き風ゲームです" />
+<meta name="keywords" content="FIRE MAX, モグラ叩き, ゲーム" />
+<link rel="canonical" href="https://hasegawa-campfire.github.io/fire-max/" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://hasegawa-campfire.github.io/fire-max/" />
+<meta property="og:title" content="FIRE MAX" />
+<meta property="og:site_name" content="FIRE MAX" />
+<meta property="og:description" content="焚き火さんをあつめて目指せハイスコア！シンプルなモグラ叩き風ゲームです" />
+<meta property="og:image" content="https://hasegawa-campfire.github.io/fire-max/assets/ogp.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@hsgwkt" />
+
+<style>
+  [hidden] {
+    display: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  body {
+    user-select: none;
+    background-color: #fff;
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    color: #666;
+  }
+  app-root + h2 {
+    display: none;
+  }
+  h2 {
+    text-align: center;
+  }
+  :root {
+    --takibi-a: hsl(0, 100%, 69%);
+    --takibi-b: hsl(193, 100%, 55%);
+    --chain: hsl(36, 100%, 79%);
+    --fever-0: hsl(26, 100%, 60%);
+    --fever-1: hsl(36, 100%, 60%);
+    --bg-light-0: hsl(0, 100%, 92%);
+    --bg-light-1: hsl(18, 100%, 92%);
+    --bg-light-2: hsl(37, 100%, 92%);
+    --bg-vivid-0: hsl(0, 100%, 70%);
+    --bg-vivid-1: hsl(18, 100%, 70%);
+    --bg-vivid-2: hsl(37, 100%, 70%);
+    --rank-bg-0: hsl(20, 100%, 89%);
+    --rank-bg-1: hsl(10, 100%, 88%);
+    --rank-bg-2: hsl(0, 100%, 87%);
+    --rank-0: hsl(20, 100%, 68%);
+    --rank-1: hsl(10, 100%, 68%);
+    --rank-2: hsl(0, 100%, 68%);
+    --accent-light: hsl(37, 92%, 90%);
+    --button-face: hsl(0, 100%, 82%);
+    --button-dark: hsl(0, 85%, 28%);
+    --takibi-url: url('assets/takibi.png');
+  }
+</style>
+
+<script type="module" data-prod-remove>
+  await navigator.serviceWorker.register('sw-dev.js')
+  if (!navigator.serviceWorker.controller) {
+    await new Promise((resolve) => {
+      navigator.serviceWorker.addEventListener('controllerchange', resolve)
+    })
+  }
+  await import('./main.js')
+</script>
+
+<template data-prod-expand>
+  <script>
+    navigator.serviceWorker.register('sw.js')
+  </script>
+</template>
+
+<app-root></app-root>
+<h2>ご利用のブラウザはサポートされていません</h2>

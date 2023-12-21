@@ -1,0 +1,135 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setAudioVolume } from '@/lib/audio.js'
+  import { CSSAnime } from '@/lib/css-anime.js'
+  import { activeState, loop, store } from '@/r.js'
+  import { beforeUpdateKeys, afterUpdateKeys } from '@/keys.js'
+  import { isMute } from '@/helper.js'
+  import './title/title-root.m.html'
+  import './play/play-root.m.html'
+  import './result/result-root.m.html'
+
+  const supported = CSS.supports && CSS.supports('width:1cqw')
+
+  class AppRoot extends HTMLElement {
+    anime = new CSSAnime()
+    nextScene = store.scene
+    #scene
+
+    constructor() {
+      super()
+      if (!supported) return
+      renderRoot(this, import.meta.document)
+
+      this.#scene = document.createElement(`${this.nextScene}-root`)
+      this.appendChild(this.#scene)
+
+      loop.on(() => this.update())
+      activeState.on((state) => this.onActiveChange(state))
+    }
+
+    connectedCallback() {
+      if (!supported) return this.remove()
+      this.anime.load(this.shadowRoot)
+      loop.active = true
+    }
+
+    update() {
+      if (this.nextScene !== store.scene) {
+        this.nextScene = store.scene
+        this.anime.cancel('scene-enter')
+        this.anime.speed(store.leaveSpeed, 'scene-leave')
+        this.anime.play('scene-leave')
+        store.leaveSpeed = 1
+      }
+
+      if (this.nextScene !== this.#scene.name && this.anime.isFinished('scene-leave')) {
+        this.#scene.fin()
+        this.#scene = document.createElement(`${this.nextScene}-root`)
+        this.replaceChildren(this.#scene)
+        this.anime.play('scene-enter')
+        this.anime.cancel('scene-leave')
+      }
+
+      beforeUpdateKeys()
+      this.#scene.update()
+      afterUpdateKeys()
+    }
+
+    onActiveChange(state) {
+      setAudioVolume(state && !isMute() ? 0.21 : 0)
+    }
+  }
+
+  customElements.define('app-root', AppRoot)
+</script>
+
+<template>
+  <div class="container">
+    <div class="scene-container">
+      <slot></slot>
+    </div>
+    <div class="scene-overlay"></div>
+  </div>
+
+  <style>
+    :host {
+      aspect-ratio: 3 / 4;
+      display: block;
+      margin: 0 auto;
+      width: min(100dvw, 75dvh, 768px);
+      height: auto;
+      container-type: size;
+      overflow: hidden;
+      contain: strict;
+    }
+
+    .container {
+      margin: 0 auto;
+      padding: calc(1.2cqw + 6px);
+      width: 100cqw;
+      height: 100%;
+      box-sizing: border-box;
+      --scene-width: calc(97.6cqw - 12px);
+      contain: size;
+    }
+
+    .scene-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .scene-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: #fff;
+      z-index: -1;
+      animation: scene-leave 0.3s ease-out paused forwards, scene-enter 0.2s ease-in paused backwards;
+      opacity: 0;
+      contain: strict;
+    }
+
+    @keyframes scene-leave {
+      from {
+        opacity: 0;
+        z-index: 9;
+      }
+      to {
+        opacity: 1;
+        z-index: 9;
+      }
+    }
+
+    @keyframes scene-enter {
+      from {
+        opacity: 1;
+        z-index: 9;
+      }
+      to {
+        opacity: 0;
+        z-index: 9;
+      }
+    }
+  </style>
+</template>

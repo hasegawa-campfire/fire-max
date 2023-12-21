@@ -1,0 +1,215 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setTipsRead } from '@/helper.js'
+  import '../x-modal.m.html'
+  import '../takibi-san.m.html'
+
+  class ModalHelp extends HTMLElement {
+    #modal
+    #body
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#modal = this.shadowRoot.querySelector('x-modal')
+      this.#body = this.shadowRoot.querySelector('.body')
+    }
+
+    open() {
+      this.#body.scrollTop = 0
+      this.#modal.open()
+    }
+  }
+
+  customElements.define('modal-help', ModalHelp)
+</script>
+
+<template>
+  <x-modal label="HELP">
+    <div class="body">
+      <h4>このゲームは？</h4>
+      CAMPFIREのアドベントカレンダーで作られた、非公式のミニゲームです<br />
+      <a href="https://qiita.com/advent-calendar/2023/campfire" target="_blank">Advent Calendar 2023</a><br />
+
+      <h4>遊び方</h4>
+      <div class="takibi-list">
+        <takibi-san type="a" rank="0" basis="height"></takibi-san>
+        <takibi-san type="b" rank="0" basis="height"></takibi-san>
+        <takibi-san type="a" rank="1" basis="height"></takibi-san>
+        <takibi-san type="b" rank="1" basis="height"></takibi-san>
+        <takibi-san type="a" rank="2" basis="height"></takibi-san>
+        <takibi-san type="b" rank="2" basis="height"></takibi-san>
+      </div>
+      『焚き火さん』をたくさん集めよう<br />
+      集めるほど火力が上がって得点もアップ！
+
+      <h4>キーボード操作</h4>
+
+      焚き火さんを集める
+      <div class="key-list">
+        <div class="keymap">
+          <div>Q</div>
+          <div>W</div>
+          <div>E</div>
+          <div>A</div>
+          <div>S</div>
+          <div>D</div>
+          <div>Z</div>
+          <div>X</div>
+          <div>C</div>
+        </div>
+        or
+        <div class="keymap">
+          <div>7</div>
+          <div>8</div>
+          <div>9</div>
+          <div>U</div>
+          <div>I</div>
+          <div>O</div>
+          <div>J</div>
+          <div>K</div>
+          <div>L</div>
+        </div>
+        or
+        <div class="keymap">
+          <div>7</div>
+          <div>8</div>
+          <div>9</div>
+          <div>4</div>
+          <div>5</div>
+          <div>6</div>
+          <div>1</div>
+          <div>2</div>
+          <div>3</div>
+        </div>
+      </div>
+
+      タイトルに戻る
+
+      <div class="key-list">
+        <div class="key">ESC</div>
+        or
+        <div class="key">ENTER</div>
+      </div>
+
+      <h4>チェーン</h4>
+      同じ色が3つ続くとチェーン成立。ボーナス点が貰えます<br />
+      成立が続くとボーナスも増えていきます<br />
+      例）赤x3 → 青x3 → 青x3 → 赤x3 など
+
+      <h4>最大火力</h4>
+      最大火力は何色ともチェーンが成立します
+
+      <div class="takibi-list">
+        <takibi-san type="wild"></takibi-san>
+      </div>
+
+      <h4>周回</h4>
+      火力は最大まで上げると一定時間で最初に戻ります<br />
+      この一周を回るたび、素点と難易度が上がっていきます<br />
+      上限は4周です
+
+      <h4>早回し</h4>
+      焚き火さんは早くあつめると次が早く出てきます<br />
+      なお早回し時にはお邪魔キャラクターが出てきません
+
+      <takibi-san type="bad"></takibi-san>
+
+      <h4>クレジット</h4>
+      制作： <a href="https://twitter.com/hsgwkt" target="_blank">8kg</a><br />
+      音楽素材： <a href="https://audiostock.jp" target="_blank">Audiostock</a><br />
+      効果音素材： <a href="https://soundeffect-lab.info" target="_blank">効果音ラボ</a>
+    </div>
+  </x-modal>
+
+  <style>
+    :host {
+      display: contents;
+    }
+
+    .body {
+      font-size: 12px;
+      line-height: 2;
+      overflow: hidden auto;
+      border: #888 2px solid;
+      padding: 0 1em 2em;
+      border-radius: 4px;
+      background-color: #fff;
+      user-select: text;
+      box-sizing: border-box;
+      height: 100%;
+      max-height: calc(32cqh + 160px);
+      background-image: linear-gradient(to bottom, #f6f6f6, #f6f6f6 50%, #fff 50%, #fff);
+      background-size: 100% 4px;
+      font-weight: 400;
+      color: #222;
+    }
+
+    h4 {
+      width: max-content;
+      line-height: 1;
+      font-size: 100%;
+      font-weight: bold;
+      margin: 2em 0 1.5em;
+      padding: 0 0.5em;
+      border-left: 1em #888 solid;
+      border-right: 1em #888 solid;
+      color: #666;
+      font-size: 120%;
+    }
+
+    .takibi-list {
+      margin: 1em 0;
+      display: flex;
+      align-items: end;
+      gap: 0 6px;
+    }
+
+    takibi-san {
+      height: 44px;
+    }
+
+    .key-list {
+      margin: 1em 0 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 0 8px;
+    }
+
+    .keymap {
+      width: max-content;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: 2em 2em 2em;
+      gap: 1px;
+      border: #ccc 2px solid;
+      border-radius: 3px;
+      line-height: 1;
+      font-size: 10px;
+      background-color: #eee;
+      box-shadow: 0 2px 0 0 #ccc;
+    }
+
+    .keymap div {
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .key {
+      border: #ccc 2px solid;
+      border-radius: 3px;
+      line-height: 2;
+      font-size: 10px;
+      background-color: #fff;
+      box-shadow: 0 2px 0 0 #ccc;
+      padding: 0 0.6em;
+      font-size: 10px;
+    }
+
+    a {
+      color: var(--takibi-a);
+    }
+  </style>
+</template>

@@ -1,0 +1,117 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { decodeReplayCode } from '@/helper.js'
+  import { store } from '@/r.js'
+  import { setKeyLog } from '@/keys.js'
+  import '../x-modal.m.html'
+  import '../x-text.m.html'
+
+  class ModalReplay extends HTMLElement {
+    #modal
+    #title
+    replayData
+
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+      this.#modal = this.shadowRoot.querySelector('x-modal')
+      this.#modal.addEventListener('accept', () => this.replay())
+      this.#title = this.shadowRoot.querySelector('.title x-text')
+    }
+
+    open(code) {
+      this.replayData = decodeReplayCode(code)
+
+      const score = String(Math.min(this.replayData?.score ?? 0, 99999999)).padStart(8, '0')
+      const nums = this.shadowRoot.querySelectorAll('.num')
+
+      nums[0].setText(score.slice(0, 4))
+      nums[1].setText(score.slice(4, 8))
+
+      if (!this.replayData) {
+        this.#title.setText('このリプレイは再生できません')
+        this.#modal.removeAttribute('accept')
+      }
+
+      this.#modal.open()
+    }
+
+    replay() {
+      store.seed = this.replayData.seed
+      store.isReplay = true
+      store.scene = 'play'
+      setKeyLog(this.replayData.keyLog)
+    }
+  }
+
+  customElements.define('modal-replay', ModalReplay)
+</script>
+
+<template>
+  <x-modal label="REPLAY" accept>
+    <div class="body">
+      <div class="title">
+        <x-text>このリプレイを再生します</x-text>
+      </div>
+      <div class="score">
+        <div class="label">SCORE</div>
+        <div class="nums">
+          <x-text class="num first" deco>0000</x-text>
+          <x-text class="num last" deco>0000</x-text>
+        </div>
+      </div>
+    </div>
+  </x-modal>
+
+  <style>
+    :host {
+      display: contents;
+    }
+
+    .body {
+      border: #888 2px solid;
+      padding: calc(1.6cqw + 8px) 0;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+
+    .title {
+      display: flex;
+      justify-content: center;
+      color: #666;
+      font-size: calc(2cqw + 10px);
+      border-bottom: 2px #ccc dashed;
+      padding-bottom: calc(1.2cqw + 6px);
+      --x-text-stroke-color: transparent;
+    }
+
+    .score {
+      width: max-content;
+      margin: calc(1.2cqw + 6px) auto 0;
+    }
+
+    .label {
+      color: #888;
+      font-size: calc(1.4cqw + 7px);
+    }
+
+    .nums {
+      display: flex;
+      align-items: baseline;
+      gap: 0 calc(0.2cqw + 1px);
+    }
+
+    .num {
+      font-size: calc(3cqw + 15px);
+      --x-text-stroke-width: calc(0.4cqw + 2px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+      color: var(--accent-light);
+    }
+
+    .num.last {
+      font-size: calc(2.4cqw + 12px);
+      --x-text-stroke-width: calc(0.3cqw + 1.5px);
+      --x-text-shadow-y: calc(0.2cqw + 1px);
+    }
+  </style>
+</template>

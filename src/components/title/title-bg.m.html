@@ -1,0 +1,119 @@
+<script type="module">
+  import { renderRoot } from '@/lib/el.js'
+  import { setCSSProps } from '@/lib/css-prop.js'
+  import './effect-takibi.m.html'
+  import '../takibi-san.m.html'
+
+  class TitleBg extends HTMLElement {
+    constructor() {
+      super()
+      renderRoot(this, import.meta.document)
+
+      const takibis = this.shadowRoot.querySelectorAll('effect-takibi')
+      const iArr = Array.from(takibis).map((_, i) => i + 1)
+      const jArr = Array.from(takibis).map((_, i) => i + 1)
+      for (const el of takibis) {
+        const iIndex = Math.floor(Math.random() * iArr.length)
+        const jIndex = Math.floor(Math.random() * jArr.length)
+        setCSSProps(el, { '--i': iArr.splice(iIndex, 1)[0], '--j': jArr.splice(jIndex, 1)[0] })
+      }
+    }
+  }
+
+  customElements.define('title-bg', TitleBg)
+</script>
+
+<template>
+  <div class="bg-linear"></div>
+  <div class="bg-frame"></div>
+
+  <div class="bg-falls" style="--len: 10">
+    <effect-takibi><takibi-san type="a" rank="0" basis="width"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="a" rank="1"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="a" rank="2"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="b" rank="0" basis="width"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="b" rank="1"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="b" rank="2"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="wild"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="wild"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="bad" basis="width"></takibi-san></effect-takibi>
+    <effect-takibi><takibi-san type="bad" basis="width"></takibi-san></effect-takibi>
+  </div>
+
+  <div class="overlay"></div>
+
+  <style>
+    :host {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(to bottom, var(--bg-vivid-2), var(--bg-vivid-1) 70%, var(--bg-vivid-0));
+      /* background-image: linear-gradient(
+        to bottom,
+        hsl(212, 100%, 5%),
+        hsl(212, 100%, 12%) 60%,
+        hsl(0, 100%, 21%) 85%,
+        hsl(27, 100%, 50%) 90%,
+        hsl(60, 100%, 76%) 95%,
+        hsl(60, 100%, 76%)
+      ); */
+      contain: strict;
+    }
+
+    .bg-linear {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: calc(100% + ((16cqw + 80px) * 1.4142));
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        135deg,
+        transparent 0,
+        transparent calc(4cqw + 20px),
+        #fff6 calc(4cqw + 20px),
+        #fff6 calc(8cqw + 40px),
+        transparent calc(8cqw + 40px),
+        transparent calc(12cqw + 60px),
+        #fffa calc(12cqw + 60px),
+        #fffa calc(16cqw + 80px)
+      );
+      animation: bg-linear 5s infinite linear;
+      /* will-change: transform; */
+      contain: strict;
+    }
+
+    @keyframes bg-linear {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(calc((16cqw + 80px) * -1.4142));
+      }
+    }
+
+    .bg-frame {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/halftone-left.png'), url('assets/halftone-right.png');
+      background-position: left calc(-2cqw - 10px) top 0, right calc(-2cqw - 10px) top 0;
+      background-repeat: repeat-y;
+      background-size: calc(6.4cqw + 32px) auto;
+      contain: strict;
+    }
+
+    .bg-falls {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      contain: strict;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0.8;
+      contain: strict;
+    }
+  </style>
+</template>
