@@ -63,7 +63,7 @@
 
     goPlay() {
       if (store.scene === 'title') {
-        store.isReplay = false
+        store.replay = null
         store.scene = 'play'
         store.leaveSpeed = 0.5
         this.#pressStart.enter()

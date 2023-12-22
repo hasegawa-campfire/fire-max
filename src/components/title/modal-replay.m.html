@@ -37,8 +37,7 @@
     }
 
     replay() {
-      store.seed = this.replayData.seed
-      store.isReplay = true
+      store.replay = this.replayData
       store.scene = 'play'
       setKeyLog(this.replayData.keyLog)
     }

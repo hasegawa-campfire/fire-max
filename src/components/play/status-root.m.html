@@ -17,8 +17,13 @@
       renderRoot(this, import.meta.document)
 
       this.#children = this.shadowRoot.querySelectorAll('status-time,status-score,status-chain,status-rank')
+      const time = this.shadowRoot.querySelector('status-time')
 
-      if (store.isReplay) {
+      time.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('reset'))
+      })
+
+      if (store.replay) {
         const replay = this.shadowRoot.querySelector('.replay')
         setCSSProps(replay, { '--display': 'block' })
       }

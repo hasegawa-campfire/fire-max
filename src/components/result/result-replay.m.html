@@ -8,6 +8,13 @@
   import '../x-button.m.html'
 
   class ResultReplay extends HTMLElement {
+    replayData = {
+      seed: store.seed,
+      score: store.score,
+      hits: store.hits,
+      keyLog: getKeyLog(),
+    }
+
     constructor() {
       super()
       renderRoot(this, import.meta.document)
@@ -28,12 +35,7 @@
     }
 
     getUrl() {
-      const code = encodeReplayCode({
-        seed: store.seed,
-        score: store.score,
-        hits: store.hits,
-        keyLog: getKeyLog(),
-      })
+      const code = encodeReplayCode(this.replayData)
       return getReplayUrl(code)
     }
 
@@ -53,8 +55,8 @@
     }
 
     replay() {
+      store.replay = this.replayData
       store.scene = 'play'
-      store.isReplay = true
     }
   }
 

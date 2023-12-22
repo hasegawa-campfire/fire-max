@@ -28,7 +28,8 @@
     #ready
     #finish
     #modalTips
-    clicked = false
+    resetClicked = false
+    screenClicked = false
     waitCount = 0
     nextPhase = ''
 
@@ -38,13 +39,9 @@
       this.#ready = this.shadowRoot.querySelector('.ready')
       this.#finish = this.shadowRoot.querySelector('.finish')
       this.#children = this.shadowRoot.querySelectorAll('status-root, grid-root, effect-root, play-bg')
+      const statusRoot = this.shadowRoot.querySelector('status-root')
 
-      if (store.isReplay) {
-        random.seed = store.seed
-      } else {
-        random.seed = Random.genSeed()
-        store.seed = random.seed
-      }
+      store.seed = random.seed = store.replay?.seed ?? Random.genSeed()
 
       Object.assign(store, {
         playPhase: 'wait',
@@ -62,7 +59,11 @@
       })
 
       this.addEventListener('click', () => {
-        this.clicked = true
+        this.screenClicked = true
+      })
+
+      statusRoot.addEventListener('reset', () => {
+        this.resetClicked = true
       })
 
       if (isTipsRead()) {
@@ -84,7 +85,8 @@
         else if (store.playPhase === 'play') this.updatePlay()
         else if (store.playPhase === 'fin') this.updateFin()
       }
-      this.clicked = false
+      this.screenClicked = false
+      this.resetClicked = false
     }
 
     updateWait() {
@@ -114,7 +116,7 @@
     updateReady() {
       if (this.#ready.isFinished()) {
         store.playPhase = 'play'
-        if (store.isReplay) {
+        if (store.replay) {
           playKeyLog()
           beforeUpdateKeys()
         } else {
@@ -168,20 +170,26 @@
       if (store.time <= 0) {
         this.#finish.play()
         store.playPhase = 'fin'
-        if (!store.isReplay) afterUpdateKeys()
+        if (!store.replay) afterUpdateKeys()
         endKeyLog()
         bgm.play.setVolume(0, 2)
         bgm.play.stop(2)
         bgm.fever.setVolume(0, 2)
         bgm.fever.stop(2)
-      } else if (isResetKeyDown()) {
-        store.scene = 'title'
+      } else if (isResetKeyDown() || this.resetClicked) {
+        if (store.replay) {
+          store.scene = 'result'
+          store.score = store.replay.score
+          store.hits = store.replay.hits
+        } else {
+          store.scene = 'title'
+        }
         se.buttonDown.play()
       }
     }
 
     updateFin() {
-      const keyDown = (this.clicked || isAnyKeyDown()) && this.#finish.isFinished()
+      const keyDown = (this.screenClicked || isAnyKeyDown()) && this.#finish.isFinished()
       if (keyDown || this.#finish.isFinishedAll()) {
         store.scene = 'result'
       }

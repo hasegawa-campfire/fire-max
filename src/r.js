@@ -13,7 +13,7 @@ export const store = {
   leaveSpeed: 1,
   hiScore: 0,
   seed: 0,
-  isReplay: false,
+  replay: null,
   playPhase: '',
   time: 0,
   score: 0,
