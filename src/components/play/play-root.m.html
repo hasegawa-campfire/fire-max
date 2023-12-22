@@ -71,9 +71,8 @@
       } else {
         this.nextPhase = 'tips'
         this.waitCount = 0.8 * loop.fps
-        const container = this.shadowRoot.querySelector('.container')
         this.#modalTips = document.createElement('modal-tips')
-        container.appendChild(this.#modalTips)
+        this.shadowRoot.appendChild(this.#modalTips)
       }
     }
 
