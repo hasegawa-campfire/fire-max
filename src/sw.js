@@ -1,4 +1,4 @@
-const cacheName = 'v1.2'
+const cacheName = 'v1.3.0'
 
 self.addEventListener('install', (e) => {
   const fn = async () => {
