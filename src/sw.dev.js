@@ -1,16 +1,4 @@
-function html2module(html) {
-  let script = ''
-
-  html = html.replace(/<script[\s\S]*?>([\s\S]*?)<\/script>/g, (_, content) => {
-    script += content
-    return ''
-  })
-
-  return `
-    const __import_meta_document__ = new DOMParser().parseFromString(${JSON.stringify(html)}, 'text/html');
-    ${script.replaceAll('import.meta.document', '__import_meta_document__')}
-  `
-}
+import { html2module } from './lib/html-module.mjs'
 
 async function fetchModuleHtml(req) {
   const res = await fetch(req)

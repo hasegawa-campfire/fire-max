@@ -102,7 +102,7 @@
 </style>
 
 <script type="module" data-prod-remove>
-  await navigator.serviceWorker.register('sw-dev.js')
+  await navigator.serviceWorker.register('sw.dev.js', { type: 'module' })
   if (!navigator.serviceWorker.controller) {
     await new Promise((resolve) => {
       navigator.serviceWorker.addEventListener('controllerchange', resolve)
