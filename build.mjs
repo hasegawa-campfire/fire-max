@@ -3,8 +3,8 @@ import { htmlPlugin } from '@craftamap/esbuild-plugin-html'
 import { copy } from 'esbuild-plugin-copy'
 import { JSDOM } from 'jsdom'
 import { glob } from 'glob'
-import { readFile, writeFile, mkdir } from 'fs/promises'
-import { createWriteStream } from 'fs'
+import { readFile, writeFile } from 'fs/promises'
+import { packBin } from './src/lib/bin-util.mjs'
 
 function html2module(html) {
   let script = ''
@@ -19,28 +19,6 @@ function html2module(html) {
     ${script.replaceAll('import.meta.document', '__import_meta_document__')}
   `
 }
-
-async function packBin() {
-  const paths = await glob('**/*.*', { cwd: './src/bin' })
-
-  await mkdir('./dist')
-  const ws = createWriteStream('./dist/data.bin')
-
-  const files = []
-  let offset = 0
-
-  for (const path of paths) {
-    const file = await readFile(`./src/bin/${path}`)
-    ws.write(file)
-    files.push([path, [offset, file.length]])
-    offset += file.length
-  }
-
-  ws.end()
-  return files
-}
-
-const binFiles = await packBin()
 
 const dom = new JSDOM(await readFile('src/index.html'))
 for (const el of dom.window.document.querySelectorAll('[data-prod-remove]')) {
@@ -57,26 +35,10 @@ await esbuild.build({
   metafile: true,
   outdir: 'dist/',
   format: 'esm',
+  define: {
+    BIN_FILES: JSON.stringify(await packBin()),
+  },
   plugins: [
-    {
-      name: 'bin-loader',
-      async setup(build) {
-        build.onLoad({ filter: /src[\/\\]lib[\/\\]bin\.js$/ }, async (args) => {
-          const script = `
-            const cache = {}
-            {
-              const files = ${JSON.stringify(binFiles)}
-              const promise = fetch('./data.bin').then((res) => res.arrayBuffer())
-              for (const [path, [offset, size]] of files) {
-                cache[path] = promise.then((buf) => buf.slice(offset, offset + size))
-              }
-            }
-            export default (path) => cache[path]
-          `
-          return { contents: script, loader: 'js' }
-        })
-      },
-    },
     {
       name: 'html-modules',
       async setup(build) {
@@ -101,7 +63,6 @@ await esbuild.build({
       assets: [
         { from: './src/assets/*', to: './assets' },
         { from: './src/manifest.json', to: './' },
-        // { from: './src/sw.js', to: './' },
       ],
     }),
   ],
