@@ -23,7 +23,7 @@ self.addEventListener('fetch', (e) => {
 self.addEventListener('activate', (e) => {
   const fn = async () => {
     for (const key of await caches.keys()) {
-      if (key !== cacheName) await caches.delete(key)
+      if (key !== version) await caches.delete(key)
     }
   }
 
