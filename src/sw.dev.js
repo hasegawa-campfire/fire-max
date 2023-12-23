@@ -1,4 +1,4 @@
-import { html2module } from './lib/html-module.mjs'
+import { html2module } from './lib/html-modules-util.mjs'
 
 async function fetchModuleHtml(req) {
   const res = await fetch(req)
