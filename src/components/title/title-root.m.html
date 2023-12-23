@@ -1,7 +1,7 @@
 <script type="module">
   import { renderRoot } from '@/lib/el.js'
   import { setAudioVolume } from '@/lib/audio.js'
-  import { CSSProp } from '@/lib/css-prop.js'
+  import { CSSProp, setCSSProps } from '@/lib/css-prop.js'
   import { store, bgm } from '@/r.js'
   import { getReplayQuery, clearReplayQuery, isMute, setMute } from '@/helper.js'
   import { isAnyKeyDown } from '@/keys.js'
@@ -13,6 +13,7 @@
   import './modal-replay.m.html'
   import './modal-help.m.html'
   import './effect-press-start.m.html'
+  import { version } from 'package.json'
 
   class TitleRoot extends HTMLElement {
     name = 'title'
@@ -36,6 +37,7 @@
       const helpButton = this.shadowRoot.querySelector('.help-button')
       const helpModal = this.shadowRoot.querySelector('modal-help')
       const replayModal = this.shadowRoot.querySelector('modal-replay')
+      const ver = this.shadowRoot.querySelector('.version')
 
       const code = getReplayQuery()
       if (code) replayModal.open(code)
@@ -53,6 +55,8 @@
       helpButton.addEventListener('click', () => {
         helpModal.open()
       })
+
+      setCSSProps(ver, { '--content': `'v${version}'` })
 
       bgm.title.play(0.7)
     }
@@ -101,7 +105,7 @@
   <modal-help></modal-help>
   <modal-replay></modal-replay>
 
-  <div class="version">v1.3.0</div>
+  <div class="version"></div>
 
   <style>
     :host {
@@ -151,6 +155,10 @@
       font-size: 12px;
       color: #888;
       pointer-events: none;
+    }
+
+    .version::before {
+      content: var(--content);
     }
   </style>
 </template>

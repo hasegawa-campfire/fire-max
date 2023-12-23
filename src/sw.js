@@ -1,10 +1,10 @@
-const cacheName = 'v1.3.0'
+import { version } from 'package.json'
 
 self.addEventListener('install', (e) => {
   const fn = async () => {
     const res = await fetch('./cache-files.json')
     const files = await res.json()
-    const cache = await caches.open(cacheName)
+    const cache = await caches.open(version)
     cache.addAll(['./', ...files])
   }
 
@@ -16,7 +16,7 @@ self.addEventListener('fetch', (e) => {
     let res = await caches.match(e.request, { ignoreSearch: true })
     if (!res) {
       res = await fetch(e)
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(version)
       cache.put(e.request, res.clone())
     }
     return res

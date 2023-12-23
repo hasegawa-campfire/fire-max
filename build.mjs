@@ -52,7 +52,7 @@ for (const el of dom.window.document.querySelectorAll('template[data-prod-expand
 
 await esbuild.build({
   bundle: true,
-  entryPoints: ['src/main.js'],
+  entryPoints: ['src/main.js', 'src/sw.js'],
   minify: true,
   metafile: true,
   outdir: 'dist/',
@@ -101,12 +101,13 @@ await esbuild.build({
       assets: [
         { from: './src/assets/*', to: './assets' },
         { from: './src/manifest.json', to: './' },
-        { from: './src/sw.js', to: './' },
+        // { from: './src/sw.js', to: './' },
       ],
     }),
   ],
   alias: {
     '@': './src',
+    'package.json': './package.json',
   },
 })
 
