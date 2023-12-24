@@ -92,7 +92,18 @@
       color: #eee;
       --x-text-stroke-width: calc(0.4cqw + 2px);
       --x-text-shadow-y: calc(0.2cqw + 1px);
+      animation: replay 1s steps(2, jump-none) infinite;
+      /* will-change: opacity; */
       contain: layout;
+    }
+
+    @keyframes replay {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </template>
