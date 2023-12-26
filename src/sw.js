@@ -5,6 +5,7 @@ const cacheFiles = CACHE_FILES
 async function onInstall(e) {
   const cache = await caches.open(version)
   await cache.addAll(['./', ...cacheFiles])
+  self.skipWaiting()
 }
 
 async function onActivate(e) {
