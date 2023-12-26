@@ -3,7 +3,7 @@ import { htmlPlugin } from '@craftamap/esbuild-plugin-html'
 import { copy } from 'esbuild-plugin-copy'
 import { JSDOM } from 'jsdom'
 import { glob } from 'glob'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import { packBin } from './src/lib/bin-util.mjs'
 import htmlModules from './src/lib/html-modules.mjs'
 
@@ -13,7 +13,7 @@ for (const el of dom.window.document.querySelectorAll('template[data-prod-expand
 
 await esbuild.build({
   bundle: true,
-  entryPoints: ['src/main.js', 'src/sw.js'],
+  entryPoints: ['src/main.js'],
   minify: true,
   metafile: true,
   outdir: 'dist/',
@@ -46,5 +46,15 @@ await esbuild.build({
   },
 })
 
-const cacheFiles = await glob('**/*.*', { cwd: './dist', ignore: ['index.html', 'sw.js'] })
-await writeFile('./dist/cache-files.json', JSON.stringify(cacheFiles))
+const cacheFiles = await glob('**/*.*', { cwd: './dist', ignore: ['index.html'] })
+
+await esbuild.build({
+  bundle: true,
+  entryPoints: ['src/sw.js'],
+  minify: true,
+  outdir: 'dist/',
+  format: 'esm',
+  define: {
+    CACHE_FILES: JSON.stringify(cacheFiles),
+  },
+})
