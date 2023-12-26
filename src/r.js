@@ -9,6 +9,7 @@ export const loop = new Loop(20)
 export const random = new Random()
 
 export const store = {
+  updatable: false,
   scene: 'title', // new URL(location).searchParams.get('scene') || 'title',
   leaveSpeed: 1,
   hiScore: 0,
