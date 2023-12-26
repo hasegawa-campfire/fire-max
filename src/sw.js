@@ -2,18 +2,18 @@ import { version } from '../package.json'
 
 const cacheFiles = CACHE_FILES
 
-async function onInstall() {
+async function onInstall(e) {
   const cache = await caches.open(version)
   await cache.addAll(['./', ...cacheFiles])
 }
 
-async function onActivate() {
+async function onActivate(e) {
   for (const key of await caches.keys()) {
     if (key !== version) await caches.delete(key)
   }
 }
 
-async function onFetch() {
+async function onFetch(e) {
   const res = await caches.match(e.request, { ignoreSearch: true })
   return res || fetch(e.request)
 }
